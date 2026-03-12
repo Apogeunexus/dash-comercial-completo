@@ -1,0 +1,1177 @@
+import { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
+
+/* ═══════════════════════════════════════════════════════════════
+   GLASS STYLE — Design System DashElias
+   ═══════════════════════════════════════════════════════════════ */
+
+const glass = {
+  background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)",
+  backdropFilter: "blur(6px) saturate(140%)",
+  WebkitBackdropFilter: "blur(6px) saturate(140%)",
+  borderBottom: "1px solid rgba(255,255,255,0.04)",
+  boxShadow: "0 4px 24px rgba(0,0,0,0.3)",
+  overflow: "hidden",
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — KPIs de Topo (expandido com nossas métricas)
+   ═══════════════════════════════════════════════════════════════ */
+
+const kpis = [
+  { label: "Faturamento", value: "R$ 520k", delta: "+12%", up: true, icon: "dollar", meta: 600000, realizado: 520000 },
+  { label: "Novas Vendas", value: "142", delta: "+8.1%", up: true, icon: "cart", meta: 180, realizado: 142 },
+  { label: "Ticket Médio", value: "R$ 3.6k", delta: "-2%", up: false, icon: "receipt", meta: 4000, realizado: 3600 },
+  { label: "Win Rate", value: "22.5%", delta: "+3.1%", up: true, icon: "trophy", meta: 30, realizado: 22.5 },
+  { label: "Pipeline Ativo", value: "R$ 890k", delta: "+18%", up: true, icon: "pipeline", meta: 1000000, realizado: 890000 },
+  { label: "CAC", value: "R$ 1.2k", delta: "-8%", up: true, icon: "target", meta: 1500, realizado: 1200 },
+  { label: "Ciclo Venda", value: "14d", delta: "-10%", up: true, icon: "clock", meta: 18, realizado: 14 },
+  { label: "MQL→SQL", value: "75%", delta: "+2%", up: true, icon: "zap", meta: 80, realizado: 75 },
+  // Novas métricas do Auton Health
+  { label: "Score SPIN", value: "7.5", delta: "+4.2%", up: true, icon: "brain", meta: 10, realizado: 7.5 },
+  { label: "MRR Acum.", value: "R$ 93k", delta: "+18%", up: true, icon: "dollar", meta: 120000, realizado: 93000 },
+  { label: "Taxa BANT+", value: "64%", delta: "+2.3%", up: true, icon: "target", meta: 80, realizado: 64 },
+  { label: "Tempo 1º Atend.", value: "3.8h", delta: "-12%", up: true, icon: "clock", meta: 4, realizado: 3.8, inverse: true },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Funis SDR + Closer
+   ═══════════════════════════════════════════════════════════════ */
+
+const sdrFunnel = {
+  stages: [
+    { label: "Lead Novo (MQL)", count: "1.240", delta: "—", up: true, w: 100 },
+    { label: "Primeiro Contato", count: "1.054", delta: "+3.2%", up: true, w: 85 },
+    { label: "Lead Trabalhando", count: "868", delta: "-1.4%", up: false, w: 70 },
+    { label: "SQL — Reunião Ag.", count: "930", delta: "+5.8%", up: true, w: 58, highlight: true },
+    { label: "Reunião Realizada", count: "791", delta: "+2.1%", up: true, w: 45 },
+  ],
+  between: [
+    { left: { k: "TX. CONTATO", v: "85%", d: "+2.1%", up: true }, right: { k: "TEMPO", v: "< 1h", d: "-12%", up: true } },
+    { left: { k: "TX. QUALIF.", v: "82,3%", d: "-1.4%", up: false }, right: { k: "TEMPO", v: "3.2d", d: "+0.5d", up: false } },
+    { left: { k: "TX. MQL→SQL", v: "75%", d: "+5.8%", up: true }, right: { k: "TEMPO", v: "5.1d", d: "-0.8d", up: true } },
+    { left: { k: "SHOW RATE", v: "85%", d: "+3.2%", up: true }, right: { k: "TEMPO", v: "1.2d", d: "-0.3d", up: true } },
+  ],
+};
+
+const closerFunnel = {
+  stages: [
+    { label: "Reunião Realizada", count: "791", delta: "+2.1%", up: true, w: 100 },
+    { label: "Proposta Enviada", count: "465", delta: "+4.5%", up: true, w: 78 },
+    { label: "Em Negociação", count: "139", delta: "-2.3%", up: false, w: 55 },
+    { label: "Venda Fechada", count: "21", delta: "+8.1%", up: true, w: 38, highlight: true },
+    { label: "Perdido / No-show", count: "118", delta: "+1.2%", up: false, w: 28 },
+  ],
+  between: [
+    { left: { k: "TX. PROPOSTA", v: "58,8%", d: "+3.1%", up: true }, right: { k: "TEMPO", v: "2.3d", d: "-0.5d", up: true } },
+    { left: { k: "TX. NEGOCIAÇÃO", v: "29,9%", d: "-4.2%", up: false }, right: { k: "TEMPO", v: "6.8d", d: "+1.2d", up: false } },
+    { left: { k: "WIN RATE", v: "15,1%", d: "+2.8%", up: true }, right: { k: "TEMPO", v: "4.1d", d: "-1.0d", up: true } },
+    { left: { k: "TX. PERDA", v: "84,9%", d: "-2.8%", up: true }, right: { k: "NO-SHOW", v: "15%", d: "-1.1%", up: true } },
+  ],
+};
+
+const sdrMetrics = [
+  { label: "Taxa de Contato", value: "85%", desc: "contatados / MQL" },
+  { label: "Taxa MQL → SQL", value: "75%", desc: "qualificados" },
+  { label: "Tempo Médio Qualif.", value: "5.1d", desc: "MQL → SQL" },
+  { label: "Show Rate", value: "85%", desc: "reuniões realizadas" },
+  { label: "Tentativas/Lead", value: "3.4x", desc: "touchpoints médio" },
+];
+
+const closerMetrics = [
+  { label: "Win Rate", value: "22.5%", desc: "propostas ganhas" },
+  { label: "Tempo SQL→Fech.", value: "13.2d", desc: "ciclo do closer" },
+  { label: "Taxa de No-show", value: "15%", desc: "não compareceram" },
+  { label: "Ticket Médio", value: "R$ 3.6k", desc: "por fechamento" },
+  { label: "Propostas Abertas", value: "47", desc: "aguardando resposta" },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Ranking de Canais (4 abas)
+   ═══════════════════════════════════════════════════════════════ */
+
+const rankingCanaisData = {
+  volume: { entries: [
+    { name: "Instagram Ads", value: "52 vendas", pct: 90, color: "rgba(251,191,36,0.5)" },
+    { name: "Google Ads", value: "39 vendas", pct: 68, color: "rgba(148,163,184,0.4)" },
+    { name: "Indicação", value: "32 vendas", pct: 55, color: "rgba(180,83,9,0.4)" },
+    { name: "Orgânico", value: "19 vendas", pct: 32, color: "rgba(110,231,183,0.35)" },
+  ]},
+  faturamento: { entries: [
+    { name: "Indicação", value: "R$ 198k", pct: 90, color: "rgba(52,211,153,0.5)" },
+    { name: "Instagram Ads", value: "R$ 152k", pct: 70, color: "rgba(251,191,36,0.4)" },
+    { name: "Google Ads", value: "R$ 113k", pct: 50, color: "rgba(148,163,184,0.4)" },
+    { name: "Orgânico", value: "R$ 57k", pct: 25, color: "rgba(167,139,250,0.35)" },
+  ]},
+  conversao: { entries: [
+    { name: "Indicação", value: "8.4%", pct: 85, color: "rgba(251,191,36,0.5)" },
+    { name: "Orgânico", value: "5.1%", pct: 50, color: "rgba(148,163,184,0.4)" },
+    { name: "Google Ads", value: "3.2%", pct: 33, color: "rgba(180,83,9,0.4)" },
+    { name: "Instagram Ads", value: "2.0%", pct: 20, color: "rgba(110,231,183,0.35)" },
+  ]},
+  ciclo: { entries: [
+    { name: "Orgânico", value: "8.2d", pct: 90, color: "rgba(52,211,153,0.5)" },
+    { name: "Instagram Ads", value: "12.1d", pct: 70, color: "rgba(148,163,184,0.4)" },
+    { name: "Google Ads", value: "15.8d", pct: 50, color: "rgba(180,83,9,0.4)" },
+    { name: "Indicação", value: "24.0d", pct: 25, color: "rgba(251,113,133,0.35)" },
+  ]},
+};
+
+const rankingTabLabels = { volume: "Volume", faturamento: "Faturamento", conversao: "Conversão", ciclo: "Ciclo" };
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Ranking de Vendedores
+   ═══════════════════════════════════════════════════════════════ */
+
+const sdrRanking = [
+  { name: "Ana Lima", value: "312 SQLs", subMetrics: "Tx.Qual: 82% · Show: 91% · Tempo: 4.2d", pct: 90, initials: "AL", color: "from-cyan-500 to-cyan-400" },
+  { name: "Carlos M.", value: "251 SQLs", subMetrics: "Tx.Qual: 76% · Show: 87% · Tempo: 5.5d", pct: 72, initials: "CM", color: "from-sky-500 to-sky-400" },
+  { name: "Fernanda R.", value: "194 SQLs", subMetrics: "Tx.Qual: 71% · Show: 82% · Tempo: 6.1d", pct: 55, initials: "FR", color: "from-teal-500 to-teal-400" },
+  { name: "Pedro S.", value: "173 SQLs", subMetrics: "Tx.Qual: 68% · Show: 80% · Tempo: 6.8d", pct: 50, initials: "PS", color: "from-emerald-500 to-emerald-400" },
+];
+
+const closerRanking = [
+  { name: "Rafael S.", value: "R$ 198k", subMetrics: "Win: 31% · Ticket: R$4.2k · Ciclo: 11d · SPIN: 8.4", pct: 90, initials: "RS", color: "from-amber-500 to-amber-400" },
+  { name: "Juliana P.", value: "R$ 142k", subMetrics: "Win: 26% · Ticket: R$3.8k · Ciclo: 14d · SPIN: 7.8", pct: 65, initials: "JP", color: "from-orange-500 to-orange-400" },
+  { name: "Marcos T.", value: "R$ 97k", subMetrics: "Win: 19% · Ticket: R$3.2k · Ciclo: 16d · SPIN: 7.1", pct: 44, initials: "MT", color: "from-yellow-600 to-yellow-500" },
+  { name: "Beatriz C.", value: "R$ 83k", subMetrics: "Win: 17% · Ticket: R$2.9k · Ciclo: 18d · SPIN: 6.5", pct: 38, initials: "BC", color: "from-rose-500 to-rose-400" },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Meta vs Realizado
+   ═══════════════════════════════════════════════════════════════ */
+
+const metaCards = [
+  { label: "Faturamento", realizado: 520000, meta: 600000, format: (v) => `R$ ${(v / 1000).toFixed(0)}k` },
+  { label: "Vendas", realizado: 142, meta: 180, format: (v) => `${v}` },
+  { label: "SQLs Gerados", realizado: 930, meta: 1100, format: (v) => `${v}` },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Pipeline Ativo
+   ═══════════════════════════════════════════════════════════════ */
+
+const pipelineItems = [
+  { name: "Barbearia Premium", value: "R$ 45k", stage: "Negociação", days: 3, risk: "low" },
+  { name: "Barber Studio VIP", value: "R$ 32k", stage: "Proposta", days: 7, risk: "medium" },
+  { name: "Dom Barba", value: "R$ 28k", stage: "Negociação", days: 12, risk: "high" },
+  { name: "Corte & Estilo", value: "R$ 22k", stage: "Proposta", days: 2, risk: "low" },
+  { name: "Navalha Dourada", value: "R$ 18k", stage: "Negociação", days: 15, risk: "high" },
+  { name: "Barba & Cia", value: "R$ 15k", stage: "Proposta", days: 5, risk: "low" },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Motivos de Perda
+   ═══════════════════════════════════════════════════════════════ */
+
+const lossReasons = [
+  { reason: "Preço alto", pct: 32, color: "#fb7185", neutralizacao: 65 },
+  { reason: "Sem orçamento", pct: 22, color: "#fbbf24", neutralizacao: 58 },
+  { reason: "Concorrente", pct: 18, color: "#a78bfa", neutralizacao: 72 },
+  { reason: "Timing", pct: 14, color: "#22d3ee", neutralizacao: 80 },
+  { reason: "Sem interesse", pct: 8, color: "#6ee7b7", neutralizacao: 75 },
+  { reason: "Perfil errado", pct: 6, color: "#94a3b8", neutralizacao: 45 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Evolução 12 Meses
+   ═══════════════════════════════════════════════════════════════ */
+
+const evolution12m = [
+  { month: "Abr", vendas: 98, conversao: 1.2, ticket: 3200, mrr: 62000 },
+  { month: "Mai", vendas: 112, conversao: 1.4, ticket: 3350, mrr: 71000 },
+  { month: "Jun", vendas: 105, conversao: 1.3, ticket: 3100, mrr: 68000 },
+  { month: "Jul", vendas: 118, conversao: 1.5, ticket: 3400, mrr: 75000 },
+  { month: "Ago", vendas: 125, conversao: 1.6, ticket: 3500, mrr: 79000 },
+  { month: "Set", vendas: 130, conversao: 1.7, ticket: 3550, mrr: 82000 },
+  { month: "Out", vendas: 119, conversao: 1.5, ticket: 3300, mrr: 76000 },
+  { month: "Nov", vendas: 138, conversao: 1.8, ticket: 3600, mrr: 85000 },
+  { month: "Dez", vendas: 155, conversao: 2.0, ticket: 3800, mrr: 95000 },
+  { month: "Jan", vendas: 128, conversao: 1.6, ticket: 3450, mrr: 80000 },
+  { month: "Fev", vendas: 135, conversao: 1.7, ticket: 3550, mrr: 84000 },
+  { month: "Mar", vendas: 142, conversao: 1.7, ticket: 3600, mrr: 93000 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Volume diário 30 dias
+   ═══════════════════════════════════════════════════════════════ */
+
+const volumeDiario = [
+  { day: "01", vendas: 4, fat: 14 }, { day: "02", vendas: 6, fat: 22 }, { day: "03", vendas: 3, fat: 11 },
+  { day: "04", vendas: 5, fat: 18 }, { day: "05", vendas: 7, fat: 25 }, { day: "06", vendas: 2, fat: 7 },
+  { day: "07", vendas: 1, fat: 4 }, { day: "08", vendas: 5, fat: 19 }, { day: "09", vendas: 8, fat: 29 },
+  { day: "10", vendas: 6, fat: 22 }, { day: "11", vendas: 4, fat: 15 }, { day: "12", vendas: 7, fat: 26 },
+  { day: "13", vendas: 3, fat: 11 }, { day: "14", vendas: 2, fat: 7 }, { day: "15", vendas: 6, fat: 21 },
+  { day: "16", vendas: 9, fat: 33 }, { day: "17", vendas: 5, fat: 18 }, { day: "18", vendas: 4, fat: 15 },
+  { day: "19", vendas: 7, fat: 25 }, { day: "20", vendas: 3, fat: 11 }, { day: "21", vendas: 1, fat: 4 },
+  { day: "22", vendas: 6, fat: 22 }, { day: "23", vendas: 8, fat: 29 }, { day: "24", vendas: 5, fat: 18 },
+  { day: "25", vendas: 4, fat: 14 }, { day: "26", vendas: 7, fat: 26 }, { day: "27", vendas: 6, fat: 22 },
+  { day: "28", vendas: 3, fat: 11 }, { day: "29", vendas: 5, fat: 18 }, { day: "30", vendas: 8, fat: 29 },
+];
+const metaDiariaVendas = 6;
+const metaDiariaFat = 20;
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Eficiência SDR/Closer
+   ═══════════════════════════════════════════════════════════════ */
+
+const efficiencySDR = [
+  { label: "Taxa de Conexão", value: "85%", pct: 85 },
+  { label: "Tempo MQL→SQL", value: "5.1d", pct: 64 },
+  { label: "Tentativas até Contato", value: "3.4x", pct: 43 },
+  { label: "Show Rate", value: "85%", pct: 85 },
+  { label: "Ligações/Semana", value: "248", pct: 82 },
+  { label: "Emails Enviados/Sem", value: "325", pct: 78 },
+];
+
+const efficiencyCloser = [
+  { label: "Win Rate", value: "22.5%", pct: 56 },
+  { label: "Tempo SQL→Fechamento", value: "13.2d", pct: 73 },
+  { label: "Taxa de No-show", value: "15%", pct: 15 },
+  { label: "Propostas em Aberto", value: "47", pct: 59 },
+  { label: "Score SPIN Médio", value: "7.5", pct: 75 },
+  { label: "Taxa Indicação", value: "28%", pct: 70 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — SPIN Selling Semanal (NOVO — Auton Health)
+   ═══════════════════════════════════════════════════════════════ */
+
+const spinWeekly = [
+  { sem: "S1", score: 5.8, a: 10, b: 30, c: 60 },
+  { sem: "S2", score: 6.2, a: 15, b: 40, c: 45 },
+  { sem: "S3", score: 6.5, a: 20, b: 45, c: 35 },
+  { sem: "S4", score: 6.9, a: 25, b: 45, c: 30 },
+  { sem: "S5", score: 7.2, a: 30, b: 45, c: 25 },
+  { sem: "S6", score: 7.6, a: 40, b: 40, c: 20 },
+  { sem: "S7", score: 7.3, a: 30, b: 40, c: 30 },
+  { sem: "S8", score: 7.8, a: 45, b: 40, c: 15 },
+  { sem: "S9", score: 8.1, a: 50, b: 35, c: 15 },
+  { sem: "S10", score: 7.0, a: 25, b: 40, c: 35 },
+  { sem: "S11", score: 7.5, a: 40, b: 42, c: 18 },
+  { sem: "S12", score: 8.2, a: 55, b: 30, c: 15 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Atividade SDR Semanal (NOVO)
+   ═══════════════════════════════════════════════════════════════ */
+
+const atividadeSDR = [
+  { sem: "S1", ligacoes: 145, emails: 210, tentativas: 3.8, tempoResp: 6.2 },
+  { sem: "S2", ligacoes: 162, emails: 228, tentativas: 4.1, tempoResp: 5.8 },
+  { sem: "S3", ligacoes: 178, emails: 245, tentativas: 4.3, tempoResp: 5.1 },
+  { sem: "S4", ligacoes: 170, emails: 240, tentativas: 4.5, tempoResp: 4.8 },
+  { sem: "S5", ligacoes: 195, emails: 268, tentativas: 4.8, tempoResp: 4.3 },
+  { sem: "S6", ligacoes: 210, emails: 285, tentativas: 5.0, tempoResp: 4.0 },
+  { sem: "S7", ligacoes: 188, emails: 260, tentativas: 4.6, tempoResp: 4.5 },
+  { sem: "S8", ligacoes: 220, emails: 295, tentativas: 5.2, tempoResp: 3.8 },
+  { sem: "S9", ligacoes: 232, emails: 310, tentativas: 5.4, tempoResp: 3.5 },
+  { sem: "S10", ligacoes: 215, emails: 290, tentativas: 5.0, tempoResp: 4.1 },
+  { sem: "S11", ligacoes: 248, emails: 325, tentativas: 5.6, tempoResp: 3.3 },
+  { sem: "S12", ligacoes: 260, emails: 340, tentativas: 5.8, tempoResp: 3.0 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Funil Overview + Volume Semanal
+   ═══════════════════════════════════════════════════════════════ */
+
+const funnelOverview = [
+  { label: "Leads (MQL)", count: "1.240", delta: "+6.2%", up: true, w: 100 },
+  { label: "SQL", count: "930", delta: "+5.8%", up: true, w: 80 },
+  { label: "Propostas", count: "465", delta: "+4.5%", up: true, w: 60 },
+  { label: "Negociação", count: "139", delta: "-2.3%", up: false, w: 42 },
+  { label: "Vendas", count: "21", delta: "+8.1%", up: true, w: 28, highlight: true },
+];
+
+const volumeSemanal = [
+  { day: "SEG", vendas: 16, fat: 52 }, { day: "TER", vendas: 22, fat: 41 },
+  { day: "QUA", vendas: 18, fat: 72 }, { day: "QUI", vendas: 26, fat: 94 },
+  { day: "SEX", vendas: 20, fat: 67 }, { day: "SAB", vendas: 12, fat: 42 },
+  { day: "DOM", vendas: 28, fat: 88 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Objeções com Neutralização (NOVO — Auton Health)
+   ═══════════════════════════════════════════════════════════════ */
+
+const objecoesData = [
+  { nome: "Preço alto", qtd: 38, neutralizacao: 65 },
+  { nome: "Concorrente", qtd: 27, neutralizacao: 72 },
+  { nome: "Sem orçamento", qtd: 23, neutralizacao: 58 },
+  { nome: "Timing ruim", qtd: 19, neutralizacao: 80 },
+  { nome: "Sem interesse", qtd: 14, neutralizacao: 75 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   TOOLTIPS — Textos explicativos para cada bloco
+   ═══════════════════════════════════════════════════════════════ */
+
+const cardTooltips = {
+  "KPIs de Topo": "Indicadores principais expandidos. Inclui vendas, faturamento, ticket médio, win rate, pipeline, CAC, ciclo, MQL→SQL, Score SPIN, MRR, BANT+ e Tempo 1º Atendimento.",
+  "Funil SDR": "Etapas de prospecção: Lead Novo → Contato → Trabalhando → SQL → Reunião. Volume, conversão e tempo por etapa.",
+  "Funil Closer": "Etapas de fechamento: Reunião → Proposta → Negociação → Venda. Inclui motivos de perda e tempo.",
+  "Ranking de Canais": "4 visões: Volume, Faturamento, Conversão e Ciclo médio por canal de aquisição.",
+  "Ranking de Vendedores": "Performance individual SDR e Closer. SDRs por SQLs, Closers por faturamento + Score SPIN.",
+  "Meta vs Realizado": "Progresso mensal vs metas para Faturamento, Vendas e SQLs com projeção.",
+  "Pipeline Ativo": "Oportunidades em andamento com indicador de risco (sem interação recente).",
+  "Motivos de Perda": "Análise de objeções com taxa de neutralização por tipo.",
+  "Evolução 12 Meses": "Tendência mensal de vendas, conversão, ticket médio e MRR nos últimos 12 meses.",
+  "Volume Diário": "Vendas e faturamento por dia nos últimos 30 dias vs meta diária.",
+  "Indicadores de Eficiência": "Métricas de eficiência SDR (conexão, qualificação, ligações, emails) e Closer (win rate, SPIN, indicação).",
+  "Score SPIN Selling": "Nota média 0-10 de aderência à metodologia SPIN nas calls, avaliada por IA. Score A (≥8), B (6-7.9), C (<6).",
+  "Atividade SDR": "Volume de atividades semanais: ligações, emails enviados, tentativas/lead e tempo 1º atendimento.",
+  "Análise de Objeções": "Ranking de objeções por frequência com taxa de neutralização sobreposta.",
+  "Insights IA": "Alertas inteligentes gerados por regras programáticas baseadas nos dados do período.",
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   SVG ICONS
+   ═══════════════════════════════════════════════════════════════ */
+
+const icons = {
+  cart: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>,
+  dollar: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  receipt: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/></svg>,
+  trophy: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
+  pipeline: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>,
+  target: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  clock: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  zap: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>,
+  brain: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a4 4 0 0 0-4 4c0 .5.1 1 .3 1.4A3.5 3.5 0 0 0 5 11c0 1.5.9 2.7 2.2 3.2A3 3 0 0 0 7 16a3 3 0 0 0 3 3h.2A3 3 0 0 0 12 22a3 3 0 0 0 1.8-3H14a3 3 0 0 0 3-3c0-.6-.2-1.2-.5-1.8A3.5 3.5 0 0 0 19 11a3.5 3.5 0 0 0-3.3-3.5c.2-.5.3-1 .3-1.5a4 4 0 0 0-4-4z"/></svg>,
+};
+
+const ArrowIcon = ({ up }) => (
+  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    {up ? <><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></> : <><path d="M12 5v14" /><path d="m19 12-7 7-7-7" /></>}
+  </svg>
+);
+
+/* ═══════════════════════════════════════════════════════════════
+   INSIGHTS IA (regras programáticas — Auton Health)
+   ═══════════════════════════════════════════════════════════════ */
+
+const insights = [
+  { tipo: "positivo", titulo: "Score SPIN acima da meta", descricao: "Média 7.5 no período (meta: 7.0). Equipe alinhada com metodologia.", acao: "Manter ritmo de coaching e documentar playbook" },
+  { tipo: "positivo", titulo: "Taxa de fechamento consistente", descricao: "Média 22.5% nas últimas 4 semanas (meta: 20%)", acao: "Pipeline saudável — escalar volume de demos" },
+  { tipo: "alerta", titulo: "Tempo 1º atendimento caiu 12%", descricao: "De 4.1h para 3.0h — melhora significativa no SLA", acao: "Manter automações de alerta de novo lead" },
+  { tipo: "oportunidade", titulo: "Objeção 'Preço alto' dominante", descricao: "32% das perdas. Taxa de neutralização: apenas 65%", acao: "Atualizar kit de ROI e comparação de mercado" },
+  { tipo: "positivo", titulo: "Ciclo de venda encurtou 38%", descricao: "De 22 dias para 14 dias no período", acao: "Qualificação mais eficiente acelerando fechamento" },
+  { tipo: "oportunidade", titulo: "MRR acelerando na 2ª metade", descricao: "R$ 56k vs R$ 37k na 1ª metade (+51%)", acao: "Momento ideal para expansão de equipe" },
+  { tipo: "positivo", titulo: "Taxa de indicação crescente", descricao: "28% nas últimas 4 semanas (meta: 25%)", acao: "Programa de referral funcionando — considerar incentivos" },
+  { tipo: "alerta", titulo: "Volume de ligações abaixo da meta", descricao: "Média 202 ligações/sem (meta: 250)", acao: "Revisar blocos de prospecção no calendário" },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════ */
+
+function Particles({ count = 3, horizontal = false }) {
+  return (
+    <div className={horizontal ? "particles-wrapper-h" : "particles-wrapper"}>
+      {Array.from({ length: count }, (_, p) => (
+        <div key={p} className="particle" style={{ animationDelay: `${(Math.random() * 3).toFixed(2)}s`, animationDuration: `${(1.4 + Math.random() * 2.8).toFixed(2)}s` }} />
+      ))}
+    </div>
+  );
+}
+
+function InfoTip({ title }) {
+  const tip = cardTooltips[title];
+  const [show, setShow] = useState(false);
+  const iconRef = useRef(null);
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+  if (!tip) return null;
+  const handleEnter = () => {
+    if (iconRef.current) {
+      const r = iconRef.current.getBoundingClientRect();
+      setPos({ top: r.bottom + 8, left: Math.max(12, Math.min(r.left + r.width / 2 - 140, window.innerWidth - 300)) });
+    }
+    setShow(true);
+  };
+  return (
+    <div ref={iconRef} className="inline-flex ml-1.5 cursor-pointer" onMouseEnter={handleEnter} onMouseLeave={() => setShow(false)}>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-colors ${show ? "text-slate-300" : "text-slate-500/40"}`}>
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+      </svg>
+      {show && typeof document !== "undefined" && createPortal(
+        <div style={{ position: "fixed", top: pos.top, left: pos.left, zIndex: 99999, width: 280, padding: "12px 14px", borderRadius: 10, background: "rgba(8,10,18,0.97)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 12px 40px rgba(0,0,0,0.6)", fontSize: 11, lineHeight: 1.6, color: "#94a3b8", pointerEvents: "none" }}>
+          <div style={{ fontWeight: 700, color: "#fff", marginBottom: 4, fontSize: 12 }}>{title}</div>
+          {tip}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FUNNEL RENDERER (reutilizável para SDR e Closer)
+   ═══════════════════════════════════════════════════════════════ */
+
+function FunnelBlock({ funnel, label, tag, tagColor, glowColor, metrics, metricsLabel }) {
+  return (
+    <div className="glass-panel rounded-2xl p-4 border border-white/[0.04] relative" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.2s both" }}>
+      <div className={`absolute -bottom-10 ${tag === "SDR" ? "-left-10" : "-right-10"} w-40 h-40 ${glowColor} rounded-full blur-[60px] pointer-events-none`} />
+      <div className="flex items-center gap-2 mb-3 relative z-10">
+        <div className={`px-2 py-0.5 rounded-md ${tagColor}`}>
+          <span className={`text-[10px] font-bold uppercase tracking-wider ${tag === "SDR" ? "text-cyan-400" : "text-amber-400"}`}>{tag}</span>
+        </div>
+        <h3 className="font-bold text-xs text-slate-300">{label}<InfoTip title={`Funil ${tag}`} /></h3>
+      </div>
+      <div className="relative z-10 flex flex-col items-center gap-1">
+        {funnel.stages.map((stage, i) => {
+          const prev = i > 0 ? funnel.between[i - 1] : null;
+          const hl = stage.highlight;
+          const hlBg = tag === "SDR"
+            ? "linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(6,182,212,0.05) 100%)"
+            : "linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(245,158,11,0.05) 100%)";
+          const normalBg = "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)";
+          return (
+            <div key={stage.label} className="flex items-center justify-center w-full">
+              <div className={`flex flex-col items-center justify-center rounded-lg transition-all duration-300 cursor-default py-1 px-3 ${hl ? `border ${tag === "SDR" ? "border-cyan-400/30" : "border-amber-400/30"}` : "border border-white/[0.06]"}`}
+                style={{ width: `${stage.w}%`, background: hl ? hlBg : normalBg }}>
+                {prev && (
+                  <div className="flex items-center justify-center gap-3 mb-0.5">
+                    <span className="text-[7px] uppercase tracking-wider text-slate-500 font-bold">{prev.left.k} <span className="text-white">{prev.left.v}</span></span>
+                    <span className="text-[7px] text-white/10">|</span>
+                    <span className="text-[7px] uppercase tracking-wider text-slate-500 font-bold">{prev.right.k} <span className="text-white">{prev.right.v}</span></span>
+                  </div>
+                )}
+                <span className={`text-[9px] font-medium ${hl ? (tag === "SDR" ? "text-cyan-400" : "text-amber-400") : "text-slate-400"}`}>{stage.label}</span>
+                <span className="text-lg font-bold text-white leading-tight">{stage.count}</span>
+                <span className={`text-[9px] font-bold flex items-center gap-0.5 ${stage.up ? "text-emerald-400" : "text-rose-400"}`}>
+                  <ArrowIcon up={stage.up} />{stage.delta}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 pt-3 border-t border-white/5 relative z-10">
+        <p className={`text-[10px] font-bold ${tag === "SDR" ? "text-cyan-400/60" : "text-amber-400/60"} uppercase tracking-widest mb-2`}>{metricsLabel}</p>
+        <div className="grid grid-cols-5 gap-1.5">
+          {metrics.map(m => (
+            <div key={m.label} className={`${tag === "SDR" ? "bg-cyan-500/[0.04] border-cyan-500/10" : "bg-amber-500/[0.04] border-amber-500/10"} border rounded-lg p-1.5 text-center`}>
+              <p className="text-[11px] font-bold text-white">{m.value}</p>
+              <p className="text-[9px] text-neutral-400 mt-0.5 leading-tight">{m.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+   ═══════════════════════════════════════════════════════════════ */
+
+export default function App() {
+  const [rankTab, setRankTab] = useState("faturamento");
+  const [sellerTab, setSellerTab] = useState("closer");
+  const [volumeMode, setVolumeMode] = useState("vendas");
+  const [effTab, setEffTab] = useState("sdr");
+  const [hoveredBar, setHoveredBar] = useState(null);
+  const [hoveredEvo, setHoveredEvo] = useState(null);
+  const [hoveredPipe, setHoveredPipe] = useState(null);
+  const [hoveredLoss, setHoveredLoss] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [expandedSeller, setExpandedSeller] = useState(null);
+  const [spinTab, setSpinTab] = useState("score"); // score | dist
+  const [hoveredSpin, setHoveredSpin] = useState(null);
+  const [hoveredAtv, setHoveredAtv] = useState(null);
+
+  const maxVendas = Math.max(...evolution12m.map(e => e.vendas));
+  const maxVolume = volumeMode === "vendas" ? Math.max(...volumeDiario.map(d => d.vendas)) : Math.max(...volumeDiario.map(d => d.fat));
+  const maxSpin = 10;
+  const maxLig = Math.max(...atividadeSDR.map(d => d.ligacoes));
+
+  return (
+    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto">
+      {/* Background orb */}
+      <div className="pointer-events-none fixed inset-0 flex items-center justify-center" style={{ zIndex: 0 }}>
+        <div className="h-[120vh] w-[120vh] rounded-full" style={{ background: "rgba(255, 177, 23, 0.25)", filter: "blur(120px)", animation: "orbPulse 5s ease-in-out infinite" }} />
+      </div>
+
+      {/* Header */}
+      <header className="flex items-center justify-between px-8 py-4 fixed top-0 left-0 right-0" style={{ ...glass, zIndex: 30, animation: "animationIn 0.8s ease-out 0.1s both" }}>
+        <div className="flex flex-col">
+          <h2 className="text-xl font-bold text-white tracking-tight">Dashboard Comercial Completo</h2>
+          <p className="text-xs text-slate-400 uppercase tracking-widest">Performance de Vendas · Visão 360°</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-black border border-white/5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400"><rect width="18" height="18" x="3" y="4" rx="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+            <span>{new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-black border border-white/5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+            <span>{new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="relative px-6 pt-28 pb-28 space-y-6 text-slate-100">
+
+        {/* ═══ KPIs de Topo (12 cards) ═══ */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {kpis.map((kpi, idx) => {
+            const pctMeta = kpi.inverse
+              ? Math.min((kpi.meta / kpi.realizado) * 100, 100)
+              : Math.min((kpi.realizado / kpi.meta) * 100, 100);
+            const metaColor = pctMeta >= 80 ? "bg-emerald-500" : pctMeta >= 60 ? "bg-amber-500" : "bg-rose-500";
+            return (
+              <div key={kpi.label} className="rounded-2xl p-4 cursor-default border border-white/[0.04] hover:border-white/[0.08] transition-colors" style={{ ...glass, animation: `animationIn 0.8s ease-out ${0.15 + idx * 0.04}s both` }}>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[11px] text-neutral-500 font-bold uppercase tracking-wider">{kpi.label}</p>
+                  <div className="text-amber-400/60">{icons[kpi.icon]}</div>
+                </div>
+                <p className="text-xl font-bold text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]">{kpi.value}</p>
+                <div className={`mt-1 flex items-center gap-1 text-[11px] font-bold ${kpi.up ? "text-emerald-400" : "text-rose-400"}`}>
+                  <ArrowIcon up={kpi.up} />{kpi.delta}
+                </div>
+                <div className="mt-2">
+                  <div className="h-1 bg-white/[0.04] rounded-full overflow-hidden">
+                    <div className={`h-full ${metaColor} rounded-full transition-all duration-1000`} style={{ width: `${pctMeta}%` }} />
+                  </div>
+                  <p className="text-[10px] text-neutral-400 mt-0.5">{pctMeta.toFixed(0)}% da meta</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ═══ Rankings + Funis SDR/Closer ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Col 1 — Rankings empilhados */}
+          <div className="flex flex-col gap-4 h-full">
+            {/* Ranking Vendedores */}
+            <div className="rounded-2xl p-4 border border-white/[0.04] flex-1 flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <h3 className="font-bold text-xs text-slate-300">Ranking de Vendedores</h3>
+                <InfoTip title="Ranking de Vendedores" />
+              </div>
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.03] border border-white/5 mb-4">
+                {[["sdr", "SDR"], ["closer", "Closer"], ["todos", "Todos"]].map(([t, l]) => (
+                  <button key={t} onClick={() => { setSellerTab(t); setExpandedSeller(null); }} className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md transition-all ${sellerTab === t ? (t === "sdr" ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/20" : "bg-amber-500/15 text-amber-400 border border-amber-500/20") : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>{l}</button>
+                ))}
+              </div>
+              <div className="flex-1 overflow-y-auto space-y-2 min-h-0">
+                {(sellerTab === "sdr" ? sdrRanking : sellerTab === "closer" ? closerRanking : [...sdrRanking.slice(0, 2), ...closerRanking.slice(0, 2)]).map((s, i) => {
+                  const posColors = ["text-amber-400", "text-slate-400", "text-amber-700", "text-neutral-600"];
+                  const barColor = sellerTab === "sdr" ? "rgba(34,211,238,0.3)" : sellerTab === "closer" ? "rgba(251,191,36,0.3)" : i < 2 ? "rgba(34,211,238,0.3)" : "rgba(251,191,36,0.3)";
+                  const isExp = expandedSeller === i;
+                  return (
+                    <div key={s.name + i} className="cursor-pointer group/r" onClick={() => setExpandedSeller(isExp ? null : i)}>
+                      <div className="flex items-center gap-2.5">
+                        <span className={`text-[10px] font-bold w-4 text-center shrink-0 ${posColors[i] || "text-neutral-600"}`}>{i + 1}°</span>
+                        <div className={`size-8 rounded-full bg-gradient-to-br ${s.color} shrink-0 flex items-center justify-center shadow-lg`}>
+                          <span className="text-[10px] font-bold text-white">{s.initials}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-xs font-bold text-white truncate">{s.name}</span>
+                            <span className="text-xs font-bold text-white shrink-0 ml-2">{s.value}</span>
+                          </div>
+                          <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-full rounded-full transition-all duration-500 group-hover/r:brightness-125" style={{ width: `${s.pct}%`, background: `linear-gradient(90deg, ${barColor}, transparent)` }} />
+                          </div>
+                        </div>
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-neutral-500 transition-transform shrink-0 ${isExp ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6"/></svg>
+                      </div>
+                      {isExp && (
+                        <div className="ml-[3.25rem] mt-1 mb-1 p-1.5 rounded-lg bg-white/[0.02] border border-white/5">
+                          <p className="text-[10px] text-neutral-400">{s.subMetrics}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Ranking Canais */}
+            <div className="rounded-2xl p-4 border border-white/[0.04] flex-1 flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.45s both" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/><path d="M15 7A3 3 0 1 0 9 7"/></svg>
+                <h3 className="font-bold text-xs text-slate-300">Ranking de Canais</h3>
+                <InfoTip title="Ranking de Canais" />
+              </div>
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.03] border border-white/5 mb-4">
+                {["volume", "faturamento", "conversao", "ciclo"].map(t => (
+                  <button key={t} onClick={() => setRankTab(t)} className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md transition-all ${rankTab === t ? "bg-amber-500/15 text-amber-400 border border-amber-500/20" : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>{rankingTabLabels[t]}</button>
+                ))}
+              </div>
+              <div className="space-y-2">
+                {rankingCanaisData[rankTab].entries.map((e, i) => {
+                  const posColors = ["text-amber-400", "text-slate-400", "text-amber-700", "text-neutral-600"];
+                  return (
+                    <div key={e.name} className="flex items-center gap-2 group/r cursor-pointer">
+                      <span className={`text-[10px] font-bold w-4 text-center ${posColors[i]}`}>{i + 1}°</span>
+                      <div className="flex-1 h-6 bg-white/[0.02] rounded overflow-hidden border border-white/[0.04]">
+                        <div className="h-full rounded flex items-center px-2 transition-all duration-500 group-hover/r:brightness-125" style={{ width: `${e.pct}%`, background: `linear-gradient(90deg, ${e.color}, transparent)` }}>
+                          <span className="text-[10px] font-bold text-white/90 truncate">{e.name}</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-white min-w-[50px] text-right">{e.value}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* SDR Funnel */}
+          <FunnelBlock funnel={sdrFunnel} label="Prospecção & Qualificação" tag="SDR" tagColor="bg-cyan-500/10 border border-cyan-500/20" glowColor="bg-cyan-500/5" metrics={sdrMetrics} metricsLabel="Métricas SDR" />
+
+          {/* Closer Funnel */}
+          <FunnelBlock funnel={closerFunnel} label="Apresentação & Fechamento" tag="CLOSER" tagColor="bg-amber-500/10 border border-amber-500/20" glowColor="bg-amber-500/5" metrics={closerMetrics} metricsLabel="Métricas Closer" />
+        </div>
+
+        {/* ═══ Funil de Vendas + Meta vs Realizado ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Meta vs Realizado */}
+          <div className="rounded-2xl p-4 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.4s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+              <h3 className="font-bold text-xs text-slate-300">Meta vs Realizado</h3>
+              <InfoTip title="Meta vs Realizado" />
+            </div>
+            <div className="flex-1 flex flex-col gap-3">
+              {metaCards.map(m => {
+                const pct = Math.min((m.realizado / m.meta) * 100, 100);
+                const diasPassados = new Date().getDate();
+                const diasNoMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+                const projecao = (m.realizado / diasPassados) * diasNoMes;
+                const pctColor = pct >= 80 ? "from-emerald-600 to-emerald-400" : pct >= 60 ? "from-amber-600 to-amber-400" : "from-rose-600 to-rose-400";
+                const projColor = projecao >= m.meta ? "text-emerald-400" : "text-amber-400";
+                return (
+                  <div key={m.label} className="bg-black/30 border border-white/5 rounded-xl p-3 flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{m.label}</span>
+                      <span className="text-[10px] font-bold text-white">{pct.toFixed(1)}%</span>
+                    </div>
+                    <div className="flex items-end gap-2 mb-2">
+                      <span className="text-lg font-bold text-white leading-tight">{m.format(m.realizado)}</span>
+                      <span className="text-[10px] text-neutral-500 mb-0.5">/ {m.format(m.meta)}</span>
+                    </div>
+                    <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden ring-1 ring-white/5 mb-1.5 relative">
+                      <div className={`h-full bg-gradient-to-r ${pctColor} rounded-full relative overflow-hidden`} style={{ width: `${pct}%`, boxShadow: "0 0 12px rgba(251,191,36,0.2)", animation: "barEnter 0.8s ease-out forwards" }}>
+                        <Particles count={2} horizontal />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] text-neutral-500">Restam {diasNoMes - diasPassados}d</span>
+                      <span className={`text-[10px] font-bold ${projColor}`}>Proj: {m.format(Math.round(projecao))}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Funil de Vendas Overview */}
+          <div className="lg:col-span-2 rounded-2xl p-5 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.2s both" }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>
+                <h3 className="font-bold text-sm text-slate-300">Funil de Vendas</h3>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5"><span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">MQL → SQL</span><span className="text-xs font-bold text-emerald-400">75,0%</span></div>
+                <div className="w-px h-3 bg-white/10" />
+                <div className="flex items-center gap-1.5"><span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">SQL → Venda</span><span className="text-xs font-bold text-emerald-400">22,5%</span></div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              {funnelOverview.map((stage, i) => {
+                const convRate = i > 0 ? ((parseFloat(funnelOverview[i].count.replace(".", "")) / parseFloat(funnelOverview[i - 1].count.replace(".", ""))) * 100).toFixed(0) + "%" : null;
+                return (
+                  <div key={stage.label} className="w-full">
+                    {i > 0 && (
+                      <div className="flex items-center justify-center gap-2 py-0.5">
+                        <div className="w-px h-1.5 border-l border-dashed border-white/10" />
+                        <span className="text-[9px] font-bold text-amber-400/60">{convRate}</span>
+                        <div className="w-px h-1.5 border-l border-dashed border-white/10" />
+                      </div>
+                    )}
+                    <div className="flex items-center justify-center">
+                      <div className={`flex-shrink-0 flex flex-col items-center justify-center rounded-xl transition-all duration-300 cursor-default py-1.5 ${stage.highlight ? "border border-amber-400/30 shadow-[0_0_20px_rgba(251,191,36,0.1)]" : "border border-white/[0.06]"}`}
+                        style={{ width: `${stage.w}%`, background: stage.highlight ? "linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(245,158,11,0.05) 100%)" : "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)" }}>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${stage.highlight ? "text-amber-400" : "text-slate-500"}`}>{stage.label}</span>
+                        <span className={`text-lg font-bold leading-tight ${stage.highlight ? "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.4)]" : "text-white"}`}>{stage.count}</span>
+                        <span className={`text-[9px] font-bold flex items-center gap-0.5 ${stage.up ? "text-emerald-400" : "text-rose-400"}`}>
+                          <ArrowIcon up={stage.up} />{stage.delta}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ Volume Semanal (Vendas + Faturamento) ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {[{ title: "Vol. Vendas (Dia)", key: "vendas", prefix: "" }, { title: "Vol. Faturamento (Dia)", key: "fat", prefix: "R$ ", suffix: "k" }].map(chart => (
+            <div key={chart.key} className="rounded-2xl p-5 border border-white/[0.04] flex flex-col overflow-hidden" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.25s both" }}>
+              <div className="flex items-center gap-2 mb-4">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 6-6"/></svg>
+                <h3 className="font-bold text-sm text-slate-300">{chart.title}</h3>
+              </div>
+              {(() => {
+                const maxV = Math.max(...volumeSemanal.map(d => d[chart.key]));
+                return (
+                  <div className="flex-1 flex gap-3 min-h-[200px]">
+                    {volumeSemanal.map((d, i) => {
+                      const h = (d[chart.key] / maxV) * 100;
+                      const isToday = d.day === "DOM";
+                      return (
+                        <div key={d.day} className="flex-1 flex flex-col items-center group/bar cursor-pointer">
+                          <span className="text-xs font-bold text-amber-400 drop-shadow-[0_0_6px_rgba(255,255,255,0.3)] mb-1.5">{chart.prefix}{d[chart.key]}{chart.suffix || ""}</span>
+                          <div className="flex-1 relative w-full">
+                            <div className={`absolute bottom-0 left-0 right-0 rounded-t-lg overflow-hidden transition-all duration-500 group-hover/bar:brightness-125 ${isToday ? "shadow-[0_0_16px_rgba(251,191,36,0.4)] ring-1 ring-amber-400/30" : "shadow-[0_0_12px_rgba(251,191,36,0.15)]"}`}
+                              style={{ height: `${h}%`, minHeight: 4, background: "linear-gradient(to top, rgb(217,119,6), rgb(251,191,36))", animation: `barEnter 0.8s ease-out ${i * 0.08}s forwards`, transformOrigin: "bottom" }}>
+                              <Particles count={5} />
+                            </div>
+                          </div>
+                          <span className={`text-xs font-bold mt-2 ${isToday ? "text-amber-400" : "text-neutral-500"}`}>{d.day}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+          ))}
+        </div>
+
+        {/* ═══ SCORE SPIN SELLING + Atividade SDR (NOVOS) ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Score SPIN Selling */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                {icons.brain}
+                <h3 className="font-bold text-sm text-slate-300">Score SPIN Selling</h3>
+                <InfoTip title="Score SPIN Selling" />
+              </div>
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.03] border border-white/5">
+                <button onClick={() => setSpinTab("score")} className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${spinTab === "score" ? "bg-purple-500/15 text-purple-400 border border-purple-500/20" : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>Score</button>
+                <button onClick={() => setSpinTab("dist")} className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${spinTab === "dist" ? "bg-purple-500/15 text-purple-400 border border-purple-500/20" : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>Distribuição</button>
+              </div>
+            </div>
+            <div className="flex-1 flex gap-1.5 relative min-h-[14rem]">
+              {spinTab === "score" ? (
+                <>
+                  {/* Meta line */}
+                  <div className="absolute left-0 right-0 border-t-2 border-dashed border-purple-400/40 pointer-events-none z-[1]" style={{ bottom: `${(7.5 / maxSpin) * 100}%` }}>
+                    <span className="absolute -top-4 right-0 text-[11px] font-bold text-purple-400/70 bg-black/60 px-1 rounded">Meta: 7.5</span>
+                  </div>
+                  {spinWeekly.map((d, i) => {
+                    const h = (d.score / maxSpin) * 100;
+                    const isHov = hoveredSpin === i;
+                    const color = d.score >= 8 ? "from-emerald-600 to-emerald-400" : d.score >= 6 ? "from-amber-600 to-amber-400" : "from-rose-600 to-rose-400";
+                    return (
+                      <div key={d.sem} className="flex-1 flex flex-col items-center cursor-pointer group/bar" onMouseEnter={() => setHoveredSpin(i)} onMouseLeave={() => setHoveredSpin(null)} onMouseMove={e => setMousePos({ x: e.clientX, y: e.clientY })}>
+                        {isHov && createPortal(
+                          <div className="fixed bg-black/95 border border-white/10 rounded-lg px-3 py-1.5 text-[11px] font-bold text-white whitespace-nowrap z-[9999] shadow-lg pointer-events-none" style={{ left: mousePos.x + 12, top: mousePos.y - 28 }}>
+                            {d.sem}: Score <span className={d.score >= 8 ? "text-emerald-400" : d.score >= 6 ? "text-amber-400" : "text-rose-400"}>{d.score}</span> · A: {d.a}% B: {d.b}% C: {d.c}%
+                          </div>, document.body
+                        )}
+                        <div className="flex-1 relative w-full">
+                          <div className={`absolute bottom-0 left-0 right-0 rounded-t overflow-hidden transition-all duration-500 group-hover/bar:brightness-125 bg-gradient-to-t ${color}`}
+                            style={{ height: `${h}%`, minHeight: 2, boxShadow: "0 0 12px rgba(168,85,247,0.15)", animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }}>
+                            <Particles count={3} />
+                          </div>
+                        </div>
+                        <span className="text-[10px] text-neutral-500 mt-1">{d.sem}</span>
+                      </div>
+                    );
+                  })}
+                </>
+              ) : (
+                /* Stacked bars A/B/C */
+                spinWeekly.map((d, i) => (
+                  <div key={d.sem} className="flex-1 flex flex-col items-center cursor-pointer group/bar" onMouseEnter={() => setHoveredSpin(i)} onMouseLeave={() => setHoveredSpin(null)} onMouseMove={e => setMousePos({ x: e.clientX, y: e.clientY })}>
+                    {hoveredSpin === i && createPortal(
+                      <div className="fixed bg-black/95 border border-white/10 rounded-lg px-3 py-1.5 text-[11px] font-bold text-white whitespace-nowrap z-[9999] shadow-lg pointer-events-none" style={{ left: mousePos.x + 12, top: mousePos.y - 28 }}>
+                        {d.sem}: <span className="text-emerald-400">A {d.a}%</span> · <span className="text-amber-400">B {d.b}%</span> · <span className="text-rose-400">C {d.c}%</span>
+                      </div>, document.body
+                    )}
+                    <div className="flex-1 relative w-full flex flex-col justify-end">
+                      <div className="rounded-t-sm bg-rose-500/80" style={{ height: `${d.c}%`, minHeight: 1 }} />
+                      <div className="bg-amber-500/80" style={{ height: `${d.b}%`, minHeight: 1 }} />
+                      <div className="rounded-t bg-emerald-500/80" style={{ height: `${d.a}%`, minHeight: 1 }} />
+                    </div>
+                    <span className="text-[10px] text-neutral-500 mt-1">{d.sem}</span>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-emerald-500" /> Score A (≥8)</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-amber-500" /> Score B (6-7.9)</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-rose-500" /> Score C (&lt;6)</span>
+              <span className="ml-auto">Média: <span className="text-purple-400 font-bold">{(spinWeekly.reduce((a, b) => a + b.score, 0) / spinWeekly.length).toFixed(1)}</span></span>
+            </div>
+          </div>
+
+          {/* Atividade SDR */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.55s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400/60"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <h3 className="font-bold text-sm text-slate-300">Atividade SDR (Semanal)</h3>
+              <InfoTip title="Atividade SDR" />
+            </div>
+            <div className="flex-1 flex gap-1 relative min-h-[14rem]">
+              {/* Meta line for ligações */}
+              <div className="absolute left-0 right-0 border-t-2 border-dashed border-cyan-400/40 pointer-events-none z-[1]" style={{ bottom: `${(200 / maxLig) * 100}%` }}>
+                <span className="absolute -top-4 right-0 text-[11px] font-bold text-cyan-400/70 bg-black/60 px-1 rounded">Meta: 200</span>
+              </div>
+              {atividadeSDR.map((d, i) => {
+                const hLig = (d.ligacoes / maxLig) * 100;
+                const isHov = hoveredAtv === i;
+                return (
+                  <div key={d.sem} className="flex-1 flex flex-col items-center cursor-pointer group/bar" onMouseEnter={() => setHoveredAtv(i)} onMouseLeave={() => setHoveredAtv(null)} onMouseMove={e => setMousePos({ x: e.clientX, y: e.clientY })}>
+                    {isHov && createPortal(
+                      <div className="fixed bg-black/95 border border-white/10 rounded-lg px-3 py-1.5 text-[11px] font-bold text-white whitespace-nowrap z-[9999] shadow-lg pointer-events-none" style={{ left: mousePos.x + 12, top: mousePos.y - 28 }}>
+                        {d.sem}: <span className="text-cyan-400">{d.ligacoes} lig.</span> · {d.emails} emails · {d.tentativas}x/lead · <span className={d.tempoResp <= 4 ? "text-emerald-400" : "text-amber-400"}>{d.tempoResp}h resp</span>
+                      </div>, document.body
+                    )}
+                    <div className="flex-1 relative w-full">
+                      <div className="absolute bottom-0 left-0 right-0 rounded-t overflow-hidden transition-all duration-500 group-hover/bar:brightness-125"
+                        style={{ height: `${hLig}%`, minHeight: 2, background: d.ligacoes >= 200 ? "linear-gradient(to top, rgb(8,145,178), rgb(34,211,238))" : "linear-gradient(to top, rgb(217,119,6), rgb(251,191,36))", boxShadow: "0 0 10px rgba(34,211,238,0.15)", animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }}>
+                        <Particles count={3} />
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-neutral-500 mt-1">{d.sem}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span>Média Lig: <span className="text-cyan-400 font-bold">{Math.round(atividadeSDR.reduce((a, b) => a + b.ligacoes, 0) / atividadeSDR.length)}</span>/sem</span>
+              <span>Média Emails: <span className="text-cyan-400 font-bold">{Math.round(atividadeSDR.reduce((a, b) => a + b.emails, 0) / atividadeSDR.length)}</span>/sem</span>
+              <span>Tempo 1º Resp: <span className="text-emerald-400 font-bold">{(atividadeSDR.reduce((a, b) => a + b.tempoResp, 0) / atividadeSDR.length).toFixed(1)}h</span></span>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ Volume Diário 30d + Evolução 12M ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Volume Diário */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 6-6"/></svg>
+                <h3 className="font-bold text-sm text-slate-300">Volume Diário — 30 dias</h3>
+                <InfoTip title="Volume Diário" />
+              </div>
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.03] border border-white/5">
+                <button onClick={() => setVolumeMode("vendas")} className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${volumeMode === "vendas" ? "bg-amber-500/15 text-amber-400 border border-amber-500/20" : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>Vendas</button>
+                <button onClick={() => setVolumeMode("faturamento")} className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${volumeMode === "faturamento" ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20" : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>Faturamento</button>
+              </div>
+            </div>
+            <div className="flex gap-2 flex-1">
+              <div className="flex flex-col justify-between py-1 text-[11px] text-neutral-500 text-right min-w-[32px]">
+                <span>{volumeMode === "vendas" ? maxVolume : `${maxVolume}k`}</span>
+                <span>{volumeMode === "vendas" ? Math.round(maxVolume * 0.5) : `${Math.round(maxVolume * 0.5)}k`}</span>
+                <span>0</span>
+              </div>
+              <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex gap-[2px] relative min-h-[12rem]">
+                  <div className="absolute left-0 right-0 top-0 border-t border-white/[0.04] pointer-events-none" />
+                  <div className="absolute left-0 right-0 top-1/2 border-t border-white/[0.04] pointer-events-none" />
+                  <div className="absolute left-0 right-0 border-t-2 border-dashed border-rose-400/40 pointer-events-none z-[1]" style={{ bottom: `${((volumeMode === "vendas" ? metaDiariaVendas : metaDiariaFat) / maxVolume) * 100}%` }}>
+                    <span className="absolute -top-4 right-0 text-[11px] font-bold text-rose-400/70 bg-black/60 px-1 rounded">Meta: {volumeMode === "vendas" ? metaDiariaVendas : `R$ ${metaDiariaFat}k`}</span>
+                  </div>
+                  {volumeDiario.map((d, i) => {
+                    const val = volumeMode === "vendas" ? d.vendas : d.fat;
+                    const meta = volumeMode === "vendas" ? metaDiariaVendas : metaDiariaFat;
+                    const h = (val / maxVolume) * 100;
+                    const aboveMeta = val >= meta;
+                    const isHov = hoveredBar === i;
+                    return (
+                      <div key={i} className="flex-1 relative cursor-pointer group/bar" onMouseEnter={() => setHoveredBar(i)} onMouseLeave={() => setHoveredBar(null)} onMouseMove={e => setMousePos({ x: e.clientX, y: e.clientY })}>
+                        {isHov && createPortal(
+                          <div className="fixed bg-black/95 border border-white/10 rounded-lg px-3 py-1.5 text-[11px] font-bold text-white whitespace-nowrap z-[9999] shadow-lg pointer-events-none" style={{ left: mousePos.x + 12, top: mousePos.y - 28 }}>
+                            <span className="text-neutral-400">Dia {d.day}</span> · <span className={aboveMeta ? "text-emerald-400" : "text-amber-400"}>{volumeMode === "vendas" ? `${val} vendas` : `R$ ${val}k`}</span>
+                          </div>, document.body
+                        )}
+                        <div className="absolute bottom-0 left-0 right-0 rounded-t-sm overflow-hidden transition-all duration-500 group-hover/bar:brightness-125"
+                          style={{ height: `${h}%`, minHeight: 2, background: aboveMeta ? "linear-gradient(to top, rgb(6,120,80), rgb(52,211,153))" : "linear-gradient(to top, rgb(217,119,6), rgb(251,191,36))", animation: `barEnter 0.8s ease-out ${i * 0.02}s forwards`, transformOrigin: "bottom" }}>
+                          <Particles count={3} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex mt-2">
+                  {volumeDiario.map((d, i) => (
+                    <div key={i} className="flex-1 text-center">{i % 5 === 0 ? <span className="text-[11px] text-neutral-500">{d.day}</span> : null}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-5 mt-4 pt-3 border-t border-white/5">
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-gradient-to-t from-emerald-600 to-emerald-400" /><span className="text-[11px] text-neutral-400">Acima da meta</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-sm bg-gradient-to-t from-amber-600 to-amber-400" /><span className="text-[11px] text-neutral-400">Abaixo da meta</span></div>
+            </div>
+          </div>
+
+          {/* Evolução 12 Meses */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.55s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+              <h3 className="font-bold text-sm text-slate-300">Evolução 12 Meses</h3>
+              <InfoTip title="Evolução 12 Meses" />
+            </div>
+            <div className="flex-1 flex gap-1.5 relative min-h-[12rem]">
+              <div className="absolute left-0 top-0 text-[10px] text-neutral-500">{maxVendas}</div>
+              <div className="absolute left-0 bottom-[18px] text-[10px] text-neutral-500">0</div>
+              {evolution12m.map((m, i) => {
+                const h = (m.vendas / maxVendas) * 100;
+                const isHov = hoveredEvo === i;
+                return (
+                  <div key={m.month} className="flex-1 flex flex-col items-center cursor-pointer group/bar" onMouseEnter={() => setHoveredEvo(i)} onMouseLeave={() => setHoveredEvo(null)} onMouseMove={e => setMousePos({ x: e.clientX, y: e.clientY })}>
+                    {isHov && createPortal(
+                      <div className="fixed bg-black/90 border border-white/10 rounded px-2 py-1 text-[11px] font-bold text-white whitespace-nowrap z-[9999] pointer-events-none" style={{ left: mousePos.x + 12, top: mousePos.y - 28 }}>
+                        {m.month}: {m.vendas} vendas · Conv: {m.conversao}% · Ticket: R$ {(m.ticket / 1000).toFixed(1)}k · MRR: R$ {(m.mrr / 1000).toFixed(0)}k
+                      </div>, document.body
+                    )}
+                    <div className="flex-1 relative w-full">
+                      <div className="absolute bottom-0 left-0 right-0 rounded-t overflow-hidden transition-all duration-500 group-hover/bar:brightness-125"
+                        style={{ height: `${h}%`, minHeight: 2, background: "linear-gradient(to top, rgb(217,119,6), rgb(251,191,36))", boxShadow: "0 0 12px rgba(251,191,36,0.15)", animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }}>
+                        <Particles count={3} />
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-neutral-500 mt-1">{m.month}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span>Média: {Math.round(evolution12m.reduce((a, b) => a + b.vendas, 0) / 12)} vendas/mês</span>
+              <span>Tendência: <span className="text-emerald-400">↑ +8.2%</span></span>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ Pipeline Ativo + Motivos de Perda (com Neutralização) ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Pipeline Ativo */}
+          <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.55s both" }}>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                {icons.pipeline}
+                <h3 className="font-bold text-sm text-slate-300">Pipeline Ativo</h3>
+                <InfoTip title="Pipeline Ativo" />
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-amber-400">R$ 160k</p>
+                <p className="text-[11px] text-neutral-500">em negociação</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {pipelineItems.map((p, i) => {
+                const riskColor = p.risk === "low" ? "bg-emerald-500" : p.risk === "medium" ? "bg-amber-500" : "bg-rose-500";
+                const riskLabel = p.risk === "low" ? "Saudável" : p.risk === "medium" ? "Atenção" : "Em risco";
+                const isHov = hoveredPipe === i;
+                return (
+                  <div key={p.name} className={`flex items-center gap-3 p-2.5 rounded-lg border transition-all cursor-pointer ${isHov ? "bg-white/[0.03] border-white/[0.08]" : "bg-white/[0.01] border-white/[0.04]"}`} onMouseEnter={() => setHoveredPipe(i)} onMouseLeave={() => setHoveredPipe(null)}>
+                    <div className={`size-2 rounded-full ${riskColor} flex-shrink-0`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-white">{p.name}</p>
+                      <p className="text-[11px] text-neutral-500">{p.stage} · {p.days}d</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-white">{p.value}</p>
+                      <p className={`text-[11px] font-bold ${p.risk === "low" ? "text-emerald-400" : p.risk === "medium" ? "text-amber-400" : "text-rose-400"}`}>{riskLabel}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-3 text-[11px]">
+                <span className="flex items-center gap-1"><span className="size-1.5 rounded-full bg-emerald-500" /> {pipelineItems.filter(p => p.risk === "low").length} saudáveis</span>
+                <span className="flex items-center gap-1"><span className="size-1.5 rounded-full bg-amber-500" /> {pipelineItems.filter(p => p.risk === "medium").length} atenção</span>
+                <span className="flex items-center gap-1"><span className="size-1.5 rounded-full bg-rose-500" /> {pipelineItems.filter(p => p.risk === "high").length} em risco</span>
+              </div>
+              <span className="text-[11px] text-amber-400 font-bold">Forecast: R$ 112k</span>
+            </div>
+          </div>
+
+          {/* Motivos de Perda + Neutralização */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.6s both" }}>
+            <div className="flex items-center gap-2 mb-5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+              <h3 className="font-bold text-sm text-slate-300">Motivos de Perda + Neutralização</h3>
+              <InfoTip title="Motivos de Perda" />
+            </div>
+            <div className="flex-1 flex flex-col items-center justify-center gap-5">
+              <div className="relative flex justify-center items-center py-2" onMouseLeave={() => setHoveredLoss(null)}>
+                <svg className="size-48" viewBox="0 0 200 200">
+                  <defs><filter id="lossGlow"><feGaussianBlur stdDeviation="2.5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter></defs>
+                  <circle cx="100" cy="100" r="70" fill="transparent" stroke="rgba(255,255,255,0.03)" strokeWidth="18" />
+                  {(() => {
+                    const r = 70, circ = 2 * Math.PI * r, gap = 8, usable = circ - gap * lossReasons.length;
+                    let off = -circ / 4;
+                    return lossReasons.map(lr => {
+                      const len = (lr.pct / 100) * usable;
+                      const dash = `${len} ${circ - len}`;
+                      const thisOff = off;
+                      off += len + gap;
+                      const isHov = hoveredLoss === lr.reason;
+                      const isDim = hoveredLoss && !isHov;
+                      return (
+                        <g key={lr.reason}>
+                          {isHov && <circle cx="100" cy="100" r={r} fill="transparent" stroke={lr.color} strokeWidth={24} strokeDasharray={dash} strokeDashoffset={-thisOff} strokeLinecap="butt" opacity="0.2" filter="url(#lossGlow)" />}
+                          <circle cx="100" cy="100" r={r} fill="transparent" stroke={lr.color} strokeWidth={isHov ? 22 : 16} strokeDasharray={dash} strokeDashoffset={-thisOff} strokeLinecap="butt" style={{ transition: "all 0.3s", opacity: isDim ? 0.2 : 1 }} />
+                          <circle cx="100" cy="100" r={r} fill="transparent" stroke="transparent" strokeWidth="30" strokeDasharray={dash} strokeDashoffset={-thisOff} className="cursor-pointer" onMouseEnter={() => setHoveredLoss(lr.reason)} />
+                        </g>
+                      );
+                    });
+                  })()}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  {hoveredLoss ? (() => {
+                    const lr = lossReasons.find(x => x.reason === hoveredLoss);
+                    return (<><p className="text-2xl font-bold text-white">{lr.pct}%</p><p className="text-[11px] text-slate-400">{lr.reason}</p><p className="text-[10px] text-emerald-400">Neutr: {lr.neutralizacao}%</p></>);
+                  })() : (<><p className="text-2xl font-bold text-white">118</p><p className="text-[11px] text-neutral-400">perdidos</p></>)}
+                </div>
+              </div>
+              <div className="w-full space-y-1.5">
+                {lossReasons.map(lr => {
+                  const isHov = hoveredLoss === lr.reason;
+                  const isDim = hoveredLoss && !isHov;
+                  return (
+                    <div key={lr.reason} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg transition-all cursor-pointer" style={{ opacity: isDim ? 0.3 : 1, background: isHov ? "rgba(255,255,255,0.04)" : "transparent" }} onMouseEnter={() => setHoveredLoss(lr.reason)} onMouseLeave={() => setHoveredLoss(null)}>
+                      <div className="size-2.5 rounded-sm flex-shrink-0" style={{ background: lr.color }} />
+                      <span className="text-xs text-slate-300 flex-1">{lr.reason}</span>
+                      <div className="flex-1 h-1.5 bg-white/[0.04] rounded-full overflow-hidden max-w-[80px]">
+                        <div className="h-full rounded-full" style={{ width: `${lr.pct}%`, background: lr.color, opacity: 0.7 }} />
+                      </div>
+                      <span className="text-xs font-bold text-white min-w-[28px] text-right">{lr.pct}%</span>
+                      <span className="text-[10px] text-emerald-400 min-w-[40px] text-right">N: {lr.neutralizacao}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ Análise de Objeções com barras (NOVO) ═══ */}
+        <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.6s both" }}>
+          <div className="flex items-center gap-2 mb-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <h3 className="font-bold text-sm text-slate-300">Análise de Objeções — Frequência vs Neutralização</h3>
+            <InfoTip title="Análise de Objeções" />
+          </div>
+          <div className="space-y-3">
+            {objecoesData.map(obj => {
+              const maxQtd = Math.max(...objecoesData.map(o => o.qtd));
+              const barW = (obj.qtd / maxQtd) * 100;
+              return (
+                <div key={obj.nome} className="flex items-center gap-4">
+                  <span className="text-xs text-slate-400 w-28 text-right shrink-0">{obj.nome}</span>
+                  <div className="flex-1 relative">
+                    <div className="h-6 bg-white/[0.03] rounded overflow-hidden border border-white/[0.04]">
+                      <div className="h-full rounded flex items-center px-2" style={{ width: `${barW}%`, background: "linear-gradient(90deg, rgba(251,191,36,0.3), transparent)" }}>
+                        <span className="text-[10px] font-bold text-white">{obj.qtd}x</span>
+                      </div>
+                    </div>
+                    {/* Neutralização overlay */}
+                    <div className="absolute right-0 top-0 bottom-0 flex items-center pr-2">
+                      <span className={`text-[11px] font-bold ${obj.neutralizacao >= 70 ? "text-emerald-400" : obj.neutralizacao >= 50 ? "text-amber-400" : "text-rose-400"}`}>
+                        Neutr: {obj.neutralizacao}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ═══ Indicadores de Eficiência SDR/Closer ═══ */}
+        <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.6s both" }}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              {icons.pipeline}
+              <h3 className="font-bold text-sm text-slate-300">Indicadores de Eficiência</h3>
+              <InfoTip title="Indicadores de Eficiência" />
+            </div>
+            <div className="flex items-center gap-1 p-0.5 rounded-lg bg-white/[0.03] border border-white/5">
+              <button onClick={() => setEffTab("sdr")} className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${effTab === "sdr" ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/20" : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>SDR</button>
+              <button onClick={() => setEffTab("closer")} className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-md transition-all ${effTab === "closer" ? "bg-amber-500/15 text-amber-400 border border-amber-500/20" : "text-slate-500 hover:text-slate-400 border border-transparent"}`}>Closer</button>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+            {(effTab === "sdr" ? efficiencySDR : efficiencyCloser).map(ind => {
+              const grad = effTab === "sdr" ? "linear-gradient(90deg, rgb(8,145,178), rgb(34,211,238))" : "linear-gradient(90deg, rgb(217,119,6), rgb(251,191,36))";
+              const glow = effTab === "sdr" ? "0 0 12px rgba(34,211,238,0.3)" : "0 0 12px rgba(251,191,36,0.3)";
+              return (
+                <div key={ind.label} className="flex flex-col gap-2">
+                  <span className="text-xs text-slate-400">{ind.label}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-3 bg-white/[0.04] rounded-full overflow-hidden ring-1 ring-white/5 relative">
+                      <div className="h-full rounded-full relative overflow-hidden" style={{ width: `${Math.max(ind.pct, 3)}%`, background: grad, boxShadow: glow, animation: "barEnter 0.8s ease-out forwards" }}>
+                        <Particles count={3} horizontal />
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-white min-w-[3.5rem] text-right">{ind.value}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ═══ Painel de Insights IA (NOVO) ═══ */}
+        <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.65s both" }}>
+          <div className="flex items-center gap-2 mb-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6"/><path d="M10 21v1h4v-1"/></svg>
+            <h3 className="font-bold text-sm text-slate-300">Insights IA — Alertas Inteligentes</h3>
+            <InfoTip title="Insights IA" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {insights.map((ins, i) => {
+              const borderC = ins.tipo === "positivo" ? "border-emerald-500/20" : ins.tipo === "alerta" ? "border-rose-500/20" : "border-amber-500/20";
+              const bgC = ins.tipo === "positivo" ? "bg-emerald-500/5" : ins.tipo === "alerta" ? "bg-rose-500/5" : "bg-amber-500/5";
+              const dotC = ins.tipo === "positivo" ? "bg-emerald-500" : ins.tipo === "alerta" ? "bg-rose-500" : "bg-amber-500";
+              const labelC = ins.tipo === "positivo" ? "text-emerald-400" : ins.tipo === "alerta" ? "text-rose-400" : "text-amber-400";
+              return (
+                <div key={i} className={`rounded-xl p-3 border ${borderC} ${bgC}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className={`size-2 rounded-full ${dotC}`} />
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${labelC}`}>{ins.tipo}</span>
+                  </div>
+                  <p className="text-xs font-bold text-white mb-0.5">{ins.titulo}</p>
+                  <p className="text-[11px] text-neutral-400 mb-1">{ins.descricao}</p>
+                  <p className="text-[10px] text-slate-500 italic">→ {ins.acao}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </main>
+
+      {/* Footer */}
+      <footer className="fixed bottom-8 left-4 right-4 flex items-center justify-between rounded-xl px-8 py-3" style={{ ...glass, zIndex: 20, animation: "animationIn 0.8s ease-out 0.6s both" }}>
+        <div className="flex items-center gap-2">
+          <div className="size-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Sistema Online - Dados em Tempo Real</span>
+        </div>
+        <div className="text-xs text-neutral-500">
+          Dashboard Comercial Completo · Visão 360° · Última atualização: {new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+        </div>
+      </footer>
+    </div>
+  );
+}
