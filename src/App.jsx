@@ -603,7 +603,10 @@ export default function App() {
                 <div className="size-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_rgba(167,139,250,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 0.6s infinite" }} />
                 <div className="size-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 1.0s infinite" }} />
               </div>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-neutral-400 transition-transform duration-300 ${insightsOpen ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6"/></svg>
+              <div className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.1] rounded-lg px-2.5 py-1 hover:bg-white/[0.1] transition-colors">
+                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">{insightsOpen ? "Recolher" : "Expandir"}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`text-amber-400 transition-transform duration-300 ${insightsOpen ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6"/></svg>
+              </div>
             </div>
           </div>
           {/* Grid de balões de mensagem */}
