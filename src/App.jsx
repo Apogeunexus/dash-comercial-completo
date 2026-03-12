@@ -661,9 +661,15 @@ export default function App() {
           })}
         </div>
 
-        {/* ═══ Rankings + Funis SDR/Closer ═══ */}
+        {/* ═══ Funis SDR/Closer + Rankings ═══ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Col 1 — Rankings empilhados */}
+          {/* SDR Funnel */}
+          <FunnelBlock funnel={sdrFunnel} label="Prospecção & Qualificação" tag="SDR" tagColor="bg-cyan-500/10 border border-cyan-500/20" glowColor="bg-cyan-500/5" metrics={sdrMetrics} metricsLabel="Métricas SDR" />
+
+          {/* Closer Funnel */}
+          <FunnelBlock funnel={closerFunnel} label="Apresentação & Fechamento" tag="CLOSER" tagColor="bg-amber-500/10 border border-amber-500/20" glowColor="bg-amber-500/5" metrics={closerMetrics} metricsLabel="Métricas Closer" />
+
+          {/* Col 3 — Rankings empilhados */}
           <div className="flex flex-col gap-4 h-full">
             {/* Ranking Vendedores */}
             <div className="rounded-2xl p-4 border border-white/[0.04] flex-1 flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
@@ -740,12 +746,6 @@ export default function App() {
               </div>
             </div>
           </div>
-
-          {/* SDR Funnel */}
-          <FunnelBlock funnel={sdrFunnel} label="Prospecção & Qualificação" tag="SDR" tagColor="bg-cyan-500/10 border border-cyan-500/20" glowColor="bg-cyan-500/5" metrics={sdrMetrics} metricsLabel="Métricas SDR" />
-
-          {/* Closer Funnel */}
-          <FunnelBlock funnel={closerFunnel} label="Apresentação & Fechamento" tag="CLOSER" tagColor="bg-amber-500/10 border border-amber-500/20" glowColor="bg-amber-500/5" metrics={closerMetrics} metricsLabel="Métricas Closer" />
         </div>
 
         {/* ═══ Funil de Vendas + Meta vs Realizado ═══ */}
