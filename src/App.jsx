@@ -257,18 +257,18 @@ const spinWeekly = [
    ═══════════════════════════════════════════════════════════════ */
 
 const atividadeSDR = [
-  { sem: "S1", ligacoes: 145, emails: 210, tentativas: 3.8, tempoResp: 6.2 },
-  { sem: "S2", ligacoes: 162, emails: 228, tentativas: 4.1, tempoResp: 5.8 },
-  { sem: "S3", ligacoes: 178, emails: 245, tentativas: 4.3, tempoResp: 5.1 },
-  { sem: "S4", ligacoes: 170, emails: 240, tentativas: 4.5, tempoResp: 4.8 },
-  { sem: "S5", ligacoes: 195, emails: 268, tentativas: 4.8, tempoResp: 4.3 },
-  { sem: "S6", ligacoes: 210, emails: 285, tentativas: 5.0, tempoResp: 4.0 },
-  { sem: "S7", ligacoes: 188, emails: 260, tentativas: 4.6, tempoResp: 4.5 },
-  { sem: "S8", ligacoes: 220, emails: 295, tentativas: 5.2, tempoResp: 3.8 },
-  { sem: "S9", ligacoes: 232, emails: 310, tentativas: 5.4, tempoResp: 3.5 },
-  { sem: "S10", ligacoes: 215, emails: 290, tentativas: 5.0, tempoResp: 4.1 },
-  { sem: "S11", ligacoes: 248, emails: 325, tentativas: 5.6, tempoResp: 3.3 },
-  { sem: "S12", ligacoes: 260, emails: 340, tentativas: 5.8, tempoResp: 3.0 },
+  { sem: "S1", ligacoes: 145, emails: 210, tentativas: 3.8, tempoResp: 6.2, tempoMsg: 2.8, tempoLig: 5.1 },
+  { sem: "S2", ligacoes: 162, emails: 228, tentativas: 4.1, tempoResp: 5.8, tempoMsg: 2.5, tempoLig: 4.8 },
+  { sem: "S3", ligacoes: 178, emails: 245, tentativas: 4.3, tempoResp: 5.1, tempoMsg: 2.1, tempoLig: 4.2 },
+  { sem: "S4", ligacoes: 170, emails: 240, tentativas: 4.5, tempoResp: 4.8, tempoMsg: 1.9, tempoLig: 3.9 },
+  { sem: "S5", ligacoes: 195, emails: 268, tentativas: 4.8, tempoResp: 4.3, tempoMsg: 1.6, tempoLig: 3.5 },
+  { sem: "S6", ligacoes: 210, emails: 285, tentativas: 5.0, tempoResp: 4.0, tempoMsg: 1.4, tempoLig: 3.2 },
+  { sem: "S7", ligacoes: 188, emails: 260, tentativas: 4.6, tempoResp: 4.5, tempoMsg: 1.8, tempoLig: 3.8 },
+  { sem: "S8", ligacoes: 220, emails: 295, tentativas: 5.2, tempoResp: 3.8, tempoMsg: 1.2, tempoLig: 2.9 },
+  { sem: "S9", ligacoes: 232, emails: 310, tentativas: 5.4, tempoResp: 3.5, tempoMsg: 1.0, tempoLig: 2.5 },
+  { sem: "S10", ligacoes: 215, emails: 290, tentativas: 5.0, tempoResp: 4.1, tempoMsg: 1.3, tempoLig: 3.1 },
+  { sem: "S11", ligacoes: 248, emails: 325, tentativas: 5.6, tempoResp: 3.3, tempoMsg: 0.9, tempoLig: 2.2 },
+  { sem: "S12", ligacoes: 260, emails: 340, tentativas: 5.8, tempoResp: 3.0, tempoMsg: 0.7, tempoLig: 1.8 },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -390,6 +390,8 @@ const cardTooltips = {
   "Ticket e Indicação": "Evolução do ticket médio por contrato e taxa de indicação por semana.",
   "Heatmap Objeções": "Mapa de calor mostrando intensidade de cada objeção por semana. Quanto mais escuro, mais frequente.",
   "Tabela Semanal": "Tabela detalhada com 13 métricas por semana, ordenável por coluna.",
+  "Tempo 1ª Mensagem": "Tempo médio para envio da primeira mensagem (WhatsApp/email) após receber o lead. Meta: < 1h.",
+  "Tempo 1ª Ligação": "Tempo médio para realizar a primeira ligação ao lead. Meta: < 4h.",
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -581,6 +583,55 @@ export default function App() {
 
       {/* Content */}
       <main className="relative px-6 pt-28 pb-28 space-y-6 text-slate-100">
+
+        {/* ═══ INSIGHTS IA — Alertas no Topo com Luzes Piscando ═══ */}
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.08s both" }}>
+          {/* Barra de luzes piscando */}
+          <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.04]">
+            <div className="flex items-center gap-2">
+              <div className="size-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8),0_0_20px_rgba(251,191,36,0.4)]" style={{ animation: "insightPulse 2s ease-in-out infinite" }} />
+              <div className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8),0_0_20px_rgba(52,211,153,0.4)]" style={{ animation: "insightPulse 2s ease-in-out 0.4s infinite" }} />
+              <div className="size-2.5 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.8),0_0_20px_rgba(251,113,133,0.4)]" style={{ animation: "insightPulse 2s ease-in-out 0.8s infinite" }} />
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6"/></svg>
+            <h3 className="text-sm font-bold text-white tracking-wide">Insights IA — Alertas Inteligentes</h3>
+            <div className="ml-auto flex items-center gap-1.5">
+              <div className="size-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 0.2s infinite" }} />
+              <div className="size-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_rgba(167,139,250,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 0.6s infinite" }} />
+              <div className="size-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 1.0s infinite" }} />
+            </div>
+          </div>
+          {/* Grid de balões de mensagem */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
+            {insights.map((ins, i) => {
+              const colors = ins.tipo === "positivo"
+                ? { dot: "bg-emerald-500", glow: "shadow-[0_0_10px_rgba(16,185,129,0.6)]", border: "border-emerald-500/25", bg: "bg-emerald-500/[0.06]", label: "text-emerald-400", arrow: "border-t-emerald-500/[0.06]" }
+                : ins.tipo === "alerta"
+                ? { dot: "bg-rose-500", glow: "shadow-[0_0_10px_rgba(244,63,94,0.6)]", border: "border-rose-500/25", bg: "bg-rose-500/[0.06]", label: "text-rose-400", arrow: "border-t-rose-500/[0.06]" }
+                : { dot: "bg-amber-500", glow: "shadow-[0_0_10px_rgba(245,158,11,0.6)]", border: "border-amber-500/25", bg: "bg-amber-500/[0.06]", label: "text-amber-400", arrow: "border-t-amber-500/[0.06]" };
+              return (
+                <div key={i} className="group relative" style={{ animation: `animationIn 0.5s ease-out ${0.1 + i * 0.08}s both` }}>
+                  {/* Luz piscando + nome */}
+                  <div className="flex items-center gap-2 mb-1.5 px-1">
+                    <div className={`size-2 rounded-full ${colors.dot} ${colors.glow}`} style={{ animation: `insightPulse ${1.8 + i * 0.2}s ease-in-out infinite` }} />
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${colors.label}`}>{ins.tipo}</span>
+                  </div>
+                  {/* Balão de mensagem */}
+                  <div className={`relative rounded-xl p-3 border ${colors.border} ${colors.bg} transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-lg`}>
+                    <p className="text-[11px] font-bold text-white mb-1 leading-snug">{ins.titulo}</p>
+                    <p className="text-[10px] text-neutral-400 leading-relaxed mb-1.5">{ins.descricao}</p>
+                    <div className="flex items-start gap-1">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={colors.label}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                      <p className="text-[9px] text-slate-500 italic leading-snug">{ins.acao}</p>
+                    </div>
+                    {/* Seta do balão */}
+                    <div className={`absolute -top-1.5 left-4 w-3 h-3 rotate-45 border-l border-t ${colors.border} ${colors.bg}`} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         {/* ═══ KPIs de Topo (12 cards) ═══ */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -924,6 +975,78 @@ export default function App() {
               <span>Média Lig: <span className="text-cyan-400 font-bold">{Math.round(atividadeSDR.reduce((a, b) => a + b.ligacoes, 0) / atividadeSDR.length)}</span>/sem</span>
               <span>Média Emails: <span className="text-cyan-400 font-bold">{Math.round(atividadeSDR.reduce((a, b) => a + b.emails, 0) / atividadeSDR.length)}</span>/sem</span>
               <span>Tempo 1º Resp: <span className="text-emerald-400 font-bold">{(atividadeSDR.reduce((a, b) => a + b.tempoResp, 0) / atividadeSDR.length).toFixed(1)}h</span></span>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ Tempo 1ª Mensagem + Tempo 1ª Ligação ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Tempo 1ª Mensagem */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.45s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400/60"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <h3 className="font-bold text-sm text-slate-300">Tempo 1ª Mensagem (horas)</h3>
+              <InfoTip title="Tempo 1ª Mensagem" />
+            </div>
+            <div className="flex-1 flex items-end gap-1">
+              {atividadeSDR.map((d, i) => {
+                const maxH = 3.0;
+                const h = Math.min(d.tempoMsg / maxH, 1) * 100;
+                const color = d.tempoMsg <= 1.0 ? "rgb(16,185,129)" : d.tempoMsg <= 2.0 ? "rgb(251,191,36)" : "rgb(244,63,94)";
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div className="w-full relative" style={{ height: 200 }}>
+                      <div className="absolute bottom-0 w-full rounded-t-md transition-all" style={{ height: `${h}%`, minHeight: 4, background: `linear-gradient(to top, ${color}88, ${color})`, boxShadow: `0 0 12px ${color}33`, animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }} />
+                      {/* Meta line at 1h */}
+                    </div>
+                    <span className="text-[9px] text-neutral-500">{d.sem}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Meta reference */}
+            <div className="relative mt-1" style={{ height: 0 }}>
+              <div className="absolute w-full border-t border-dashed border-emerald-500/40" style={{ bottom: 0 }} />
+            </div>
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+              <div className="flex items-center gap-4 text-[10px]">
+                <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-emerald-500" /> ≤ 1h</span>
+                <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-500" /> 1-2h</span>
+                <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-rose-500" /> &gt; 2h</span>
+              </div>
+              <span className="text-[10px] text-emerald-400 font-bold">Meta: ≤ 1h</span>
+            </div>
+          </div>
+
+          {/* Tempo 1ª Ligação */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <h3 className="font-bold text-sm text-slate-300">Tempo 1ª Ligação (horas)</h3>
+              <InfoTip title="Tempo 1ª Ligação" />
+            </div>
+            <div className="flex-1 flex items-end gap-1">
+              {atividadeSDR.map((d, i) => {
+                const maxH = 6.0;
+                const h = Math.min(d.tempoLig / maxH, 1) * 100;
+                const color = d.tempoLig <= 2.0 ? "rgb(16,185,129)" : d.tempoLig <= 4.0 ? "rgb(251,191,36)" : "rgb(244,63,94)";
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div className="w-full relative" style={{ height: 200 }}>
+                      <div className="absolute bottom-0 w-full rounded-t-md transition-all" style={{ height: `${h}%`, minHeight: 4, background: `linear-gradient(to top, ${color}88, ${color})`, boxShadow: `0 0 12px ${color}33`, animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }} />
+                    </div>
+                    <span className="text-[9px] text-neutral-500">{d.sem}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+              <div className="flex items-center gap-4 text-[10px]">
+                <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-emerald-500" /> ≤ 2h</span>
+                <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-500" /> 2-4h</span>
+                <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-rose-500" /> &gt; 4h</span>
+              </div>
+              <span className="text-[10px] text-emerald-400 font-bold">Meta: ≤ 4h</span>
             </div>
           </div>
         </div>
@@ -1609,33 +1732,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* ═══ Painel de Insights IA (NOVO) ═══ */}
-        <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.65s both" }}>
-          <div className="flex items-center gap-2 mb-5">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6"/><path d="M10 21v1h4v-1"/></svg>
-            <h3 className="font-bold text-sm text-slate-300">Insights IA — Alertas Inteligentes</h3>
-            <InfoTip title="Insights IA" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {insights.map((ins, i) => {
-              const borderC = ins.tipo === "positivo" ? "border-emerald-500/20" : ins.tipo === "alerta" ? "border-rose-500/20" : "border-amber-500/20";
-              const bgC = ins.tipo === "positivo" ? "bg-emerald-500/5" : ins.tipo === "alerta" ? "bg-rose-500/5" : "bg-amber-500/5";
-              const dotC = ins.tipo === "positivo" ? "bg-emerald-500" : ins.tipo === "alerta" ? "bg-rose-500" : "bg-amber-500";
-              const labelC = ins.tipo === "positivo" ? "text-emerald-400" : ins.tipo === "alerta" ? "text-rose-400" : "text-amber-400";
-              return (
-                <div key={i} className={`rounded-xl p-3 border ${borderC} ${bgC}`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className={`size-2 rounded-full ${dotC}`} />
-                    <span className={`text-[10px] font-bold uppercase tracking-wider ${labelC}`}>{ins.tipo}</span>
-                  </div>
-                  <p className="text-xs font-bold text-white mb-0.5">{ins.titulo}</p>
-                  <p className="text-[11px] text-neutral-400 mb-1">{ins.descricao}</p>
-                  <p className="text-[10px] text-slate-500 italic">→ {ins.acao}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* Insights IA foi movido para o topo */}
 
       </main>
 
