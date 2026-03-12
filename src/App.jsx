@@ -272,6 +272,66 @@ const atividadeSDR = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
+   DATA — SDR Semanal Completo (12 semanas — para gráficos)
+   ═══════════════════════════════════════════════════════════════ */
+
+const sdrWeekly = [
+  { sem: "S1", leads: 78, contato: 28, qualif: 9, demos: 7, showUps: 5, txResp: 35.9, txBANT: 50.0, txShowUp: 71.4 },
+  { sem: "S2", leads: 85, contato: 33, qualif: 12, demos: 9, showUps: 7, txResp: 38.8, txBANT: 54.5, txShowUp: 77.8 },
+  { sem: "S3", leads: 92, contato: 38, qualif: 15, demos: 11, showUps: 8, txResp: 41.3, txBANT: 60.0, txShowUp: 72.7 },
+  { sem: "S4", leads: 88, contato: 36, qualif: 14, demos: 11, showUps: 9, txResp: 40.9, txBANT: 58.3, txShowUp: 81.8 },
+  { sem: "S5", leads: 95, contato: 42, qualif: 18, demos: 14, showUps: 11, txResp: 44.2, txBANT: 62.1, txShowUp: 78.6 },
+  { sem: "S6", leads: 102, contato: 45, qualif: 20, demos: 15, showUps: 12, txResp: 44.1, txBANT: 64.5, txShowUp: 80.0 },
+  { sem: "S7", leads: 98, contato: 41, qualif: 17, demos: 13, showUps: 9, txResp: 41.8, txBANT: 63.0, txShowUp: 69.2 },
+  { sem: "S8", leads: 105, contato: 46, qualif: 21, demos: 16, showUps: 13, txResp: 43.8, txBANT: 65.6, txShowUp: 81.3 },
+  { sem: "S9", leads: 110, contato: 49, qualif: 22, demos: 17, showUps: 14, txResp: 44.5, txBANT: 64.7, txShowUp: 82.4 },
+  { sem: "S10", leads: 108, contato: 47, qualif: 20, demos: 16, showUps: 11, txResp: 43.5, txBANT: 60.6, txShowUp: 68.8 },
+  { sem: "S11", leads: 115, contato: 52, qualif: 23, demos: 18, showUps: 14, txResp: 45.2, txBANT: 63.9, txShowUp: 77.8 },
+  { sem: "S12", leads: 120, contato: 55, qualif: 25, demos: 19, showUps: 15, txResp: 45.8, txBANT: 65.8, txShowUp: 78.9 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Closer Semanal Completo (12 semanas — para gráficos)
+   ═══════════════════════════════════════════════════════════════ */
+
+const closerWeekly = [
+  { sem: "S1", demos: 5, propostas: 3, fech: 1, mrr: 1290, txFech: 20.0, ciclo: 25, ticket: 1290, indicacao: 0, followUp: 4.5 },
+  { sem: "S2", demos: 7, propostas: 4, fech: 2, mrr: 3780, txFech: 28.6, ciclo: 22, ticket: 1890, indicacao: 0, followUp: 3.8 },
+  { sem: "S3", demos: 8, propostas: 5, fech: 2, mrr: 3780, txFech: 25.0, ciclo: 19, ticket: 1890, indicacao: 10, followUp: 3.2 },
+  { sem: "S4", demos: 9, propostas: 6, fech: 3, mrr: 6270, txFech: 33.3, ciclo: 17, ticket: 2090, indicacao: 15, followUp: 2.8 },
+  { sem: "S5", demos: 11, propostas: 7, fech: 4, mrr: 8760, txFech: 36.4, ciclo: 15, ticket: 2190, indicacao: 20, followUp: 2.5 },
+  { sem: "S6", demos: 12, propostas: 8, fech: 4, mrr: 8760, txFech: 33.3, ciclo: 14, ticket: 2190, indicacao: 22, followUp: 2.2 },
+  { sem: "S7", demos: 9, propostas: 5, fech: 3, mrr: 6270, txFech: 33.3, ciclo: 16, ticket: 2090, indicacao: 18, followUp: 2.8 },
+  { sem: "S8", demos: 13, propostas: 9, fech: 5, mrr: 11250, txFech: 38.5, ciclo: 12, ticket: 2250, indicacao: 25, followUp: 1.9 },
+  { sem: "S9", demos: 14, propostas: 10, fech: 5, mrr: 11250, txFech: 35.7, ciclo: 11, ticket: 2250, indicacao: 28, followUp: 1.7 },
+  { sem: "S10", demos: 11, propostas: 7, fech: 3, mrr: 6270, txFech: 27.3, ciclo: 18, ticket: 2090, indicacao: 20, followUp: 2.3 },
+  { sem: "S11", demos: 14, propostas: 10, fech: 5, mrr: 11250, txFech: 35.7, ciclo: 10, ticket: 2250, indicacao: 30, followUp: 1.5 },
+  { sem: "S12", demos: 15, propostas: 11, fech: 6, mrr: 13950, txFech: 40.0, ciclo: 9, ticket: 2325, indicacao: 32, followUp: 1.3 },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Heatmap de Objeções (semana x tipo)
+   ═══════════════════════════════════════════════════════════════ */
+
+const heatmapData = [
+  { sem: "S1", chatgpt: 1, preco: 1, cfm: 0, prontuario: 1, dependencia: 3 },
+  { sem: "S2", chatgpt: 4, preco: 2, cfm: 1, prontuario: 0, dependencia: 1 },
+  { sem: "S3", chatgpt: 1, preco: 5, cfm: 1, prontuario: 1, dependencia: 0 },
+  { sem: "S4", chatgpt: 2, preco: 5, cfm: 1, prontuario: 1, dependencia: 0 },
+  { sem: "S5", chatgpt: 1, preco: 2, cfm: 5, prontuario: 2, dependencia: 1 },
+  { sem: "S6", chatgpt: 2, preco: 4, cfm: 2, prontuario: 2, dependencia: 1 },
+  { sem: "S7", chatgpt: 4, preco: 2, cfm: 1, prontuario: 1, dependencia: 2 },
+  { sem: "S8", chatgpt: 2, preco: 3, cfm: 2, prontuario: 4, dependencia: 1 },
+  { sem: "S9", chatgpt: 2, preco: 5, cfm: 2, prontuario: 2, dependencia: 1 },
+  { sem: "S10", chatgpt: 2, preco: 4, cfm: 2, prontuario: 1, dependencia: 2 },
+  { sem: "S11", chatgpt: 2, preco: 2, cfm: 4, prontuario: 2, dependencia: 1 },
+  { sem: "S12", chatgpt: 4, preco: 3, cfm: 2, prontuario: 2, dependencia: 1 },
+];
+
+const heatmapLabels = ["chatgpt", "preco", "cfm", "prontuario", "dependencia"];
+const heatmapNames = { chatgpt: "ChatGPT", preco: "Preço", cfm: "CFM", prontuario: "Prontuário", dependencia: "Dependência IA" };
+
+/* ═══════════════════════════════════════════════════════════════
    DATA — Funil Overview + Volume Semanal
    ═══════════════════════════════════════════════════════════════ */
 
@@ -322,6 +382,14 @@ const cardTooltips = {
   "Atividade SDR": "Volume de atividades semanais: ligações, emails enviados, tentativas/lead e tempo 1º atendimento.",
   "Análise de Objeções": "Ranking de objeções por frequência com taxa de neutralização sobreposta.",
   "Insights IA": "Alertas inteligentes gerados por regras programáticas baseadas nos dados do período.",
+  "Volume SDR": "Evolução semanal do volume absoluto de leads recebidos, qualificados e demos agendadas ao longo de 12 semanas.",
+  "Taxas SDR": "Evolução das 3 taxas de conversão do SDR (Resposta, BANT+, Show-Up) com linhas de meta.",
+  "MRR e Fechamento": "MRR gerado por semana (barras) e taxa de fechamento (linha sobreposta) ao longo de 12 semanas.",
+  "Ciclo Médio": "Dias médios entre a realização da demo e o fechamento do contrato por semana.",
+  "Follow-up pós-Demo": "Tempo médio em horas para follow-up após a demo realizada. Meta: < 2h.",
+  "Ticket e Indicação": "Evolução do ticket médio por contrato e taxa de indicação por semana.",
+  "Heatmap Objeções": "Mapa de calor mostrando intensidade de cada objeção por semana. Quanto mais escuro, mais frequente.",
+  "Tabela Semanal": "Tabela detalhada com 13 métricas por semana, ordenável por coluna.",
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -857,6 +925,415 @@ export default function App() {
               <span>Média Emails: <span className="text-cyan-400 font-bold">{Math.round(atividadeSDR.reduce((a, b) => a + b.emails, 0) / atividadeSDR.length)}</span>/sem</span>
               <span>Tempo 1º Resp: <span className="text-emerald-400 font-bold">{(atividadeSDR.reduce((a, b) => a + b.tempoResp, 0) / atividadeSDR.length).toFixed(1)}h</span></span>
             </div>
+          </div>
+        </div>
+
+        {/* ═══ NOVOS — Volume SDR + Taxas SDR ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Volume SDR — Area Chart */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400/60"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <h3 className="font-bold text-sm text-slate-300">Volume SDR (12 semanas)</h3>
+              <InfoTip title="Volume SDR" />
+            </div>
+            {(() => {
+              const maxL = Math.max(...sdrWeekly.map(d => d.leads));
+              return (
+                <div className="flex-1 relative min-h-[14rem]">
+                  {/* Grid lines */}
+                  <div className="absolute left-0 right-0 top-0 border-t border-white/[0.04] pointer-events-none" />
+                  <div className="absolute left-0 right-0 top-1/3 border-t border-white/[0.04] pointer-events-none" />
+                  <div className="absolute left-0 right-0 top-2/3 border-t border-white/[0.04] pointer-events-none" />
+                  {/* Y axis */}
+                  <div className="absolute left-0 top-0 text-[10px] text-neutral-500">{maxL}</div>
+                  <div className="absolute left-0 bottom-[20px] text-[10px] text-neutral-500">0</div>
+                  {/* SVG area chart */}
+                  <svg className="w-full h-full" viewBox="0 0 480 200" preserveAspectRatio="none">
+                    {/* Leads area */}
+                    <polygon
+                      points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.leads / maxL) * 180}`).join(" ") + ` 480,200 0,200`}
+                      fill="rgba(34,211,238,0.1)" stroke="none"
+                    />
+                    <polyline
+                      points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.leads / maxL) * 180}`).join(" ")}
+                      fill="none" stroke="rgb(34,211,238)" strokeWidth="2"
+                    />
+                    {/* Qualificados area */}
+                    <polygon
+                      points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.qualif / maxL) * 180}`).join(" ") + ` 480,200 0,200`}
+                      fill="rgba(251,191,36,0.1)" stroke="none"
+                    />
+                    <polyline
+                      points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.qualif / maxL) * 180}`).join(" ")}
+                      fill="none" stroke="rgb(251,191,36)" strokeWidth="2"
+                    />
+                    {/* Demos area */}
+                    <polygon
+                      points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.demos / maxL) * 180}`).join(" ") + ` 480,200 0,200`}
+                      fill="rgba(52,211,153,0.1)" stroke="none"
+                    />
+                    <polyline
+                      points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.demos / maxL) * 180}`).join(" ")}
+                      fill="none" stroke="rgb(52,211,153)" strokeWidth="2"
+                    />
+                    {/* Dots */}
+                    {sdrWeekly.map((d, i) => (
+                      <g key={d.sem}>
+                        <circle cx={i * (480 / 11)} cy={200 - (d.leads / maxL) * 180} r="3" fill="rgb(34,211,238)" />
+                        <circle cx={i * (480 / 11)} cy={200 - (d.qualif / maxL) * 180} r="3" fill="rgb(251,191,36)" />
+                        <circle cx={i * (480 / 11)} cy={200 - (d.demos / maxL) * 180} r="3" fill="rgb(52,211,153)" />
+                      </g>
+                    ))}
+                  </svg>
+                  {/* X labels */}
+                  <div className="flex justify-between mt-1">
+                    {sdrWeekly.map(d => <span key={d.sem} className="text-[10px] text-neutral-500">{d.sem}</span>)}
+                  </div>
+                </div>
+              );
+            })()}
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-cyan-400" /> Leads</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-400" /> Qualificados</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-emerald-400" /> Demos</span>
+            </div>
+          </div>
+
+          {/* Taxas SDR — 3 linhas com metas */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.55s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-cyan-400/60"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+              <h3 className="font-bold text-sm text-slate-300">Taxas SDR (%)</h3>
+              <InfoTip title="Taxas SDR" />
+            </div>
+            <div className="flex-1 relative min-h-[14rem]">
+              <div className="absolute left-0 top-0 text-[10px] text-neutral-500">100%</div>
+              <div className="absolute left-0 bottom-[20px] text-[10px] text-neutral-500">0%</div>
+              {/* Meta lines */}
+              <div className="absolute left-6 right-0 border-t border-dashed border-amber-400/30 pointer-events-none" style={{ bottom: `${(40 / 100) * 85 + 10}%` }}>
+                <span className="absolute -top-3 right-0 text-[9px] text-amber-400/60">Meta Resp 40%</span>
+              </div>
+              <div className="absolute left-6 right-0 border-t border-dashed border-emerald-400/30 pointer-events-none" style={{ bottom: `${(60 / 100) * 85 + 10}%` }}>
+                <span className="absolute -top-3 right-0 text-[9px] text-emerald-400/60">Meta BANT 60%</span>
+              </div>
+              <div className="absolute left-6 right-0 border-t border-dashed border-cyan-400/30 pointer-events-none" style={{ bottom: `${(75 / 100) * 85 + 10}%` }}>
+                <span className="absolute -top-3 right-0 text-[9px] text-cyan-400/60">Meta ShowUp 75%</span>
+              </div>
+              <svg className="w-full h-full" viewBox="0 0 480 200" preserveAspectRatio="none">
+                {/* Taxa Resposta */}
+                <polyline points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.txResp / 100) * 180}`).join(" ")} fill="none" stroke="rgb(251,191,36)" strokeWidth="2.5" />
+                {/* Taxa BANT */}
+                <polyline points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.txBANT / 100) * 180}`).join(" ")} fill="none" stroke="rgb(52,211,153)" strokeWidth="2.5" />
+                {/* Taxa ShowUp */}
+                <polyline points={sdrWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.txShowUp / 100) * 180}`).join(" ")} fill="none" stroke="rgb(34,211,238)" strokeWidth="2.5" />
+                {/* Dots */}
+                {sdrWeekly.map((d, i) => (
+                  <g key={d.sem}>
+                    <circle cx={i * (480 / 11)} cy={200 - (d.txResp / 100) * 180} r="3" fill="rgb(251,191,36)" />
+                    <circle cx={i * (480 / 11)} cy={200 - (d.txBANT / 100) * 180} r="3" fill="rgb(52,211,153)" />
+                    <circle cx={i * (480 / 11)} cy={200 - (d.txShowUp / 100) * 180} r="3" fill="rgb(34,211,238)" />
+                  </g>
+                ))}
+              </svg>
+              <div className="flex justify-between mt-1">
+                {sdrWeekly.map(d => <span key={d.sem} className="text-[10px] text-neutral-500">{d.sem}</span>)}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-400" /> Resposta</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-emerald-400" /> BANT+</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-cyan-400" /> Show-Up</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ NOVOS — MRR + Fechamento | Ciclo Médio ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* MRR e Taxa de Fechamento */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              {icons.dollar}
+              <h3 className="font-bold text-sm text-slate-300">MRR e Taxa de Fechamento</h3>
+              <InfoTip title="MRR e Fechamento" />
+            </div>
+            {(() => {
+              const maxMRR = Math.max(...closerWeekly.map(d => d.mrr));
+              return (
+                <div className="flex-1 relative min-h-[14rem]">
+                  <div className="absolute left-0 top-0 text-[10px] text-neutral-500">R${(maxMRR/1000).toFixed(0)}k</div>
+                  <div className="absolute right-0 top-0 text-[10px] text-neutral-500">50%</div>
+                  <div className="flex gap-1 items-end h-[13rem]">
+                    {closerWeekly.map((d, i) => {
+                      const h = (d.mrr / maxMRR) * 100;
+                      return (
+                        <div key={d.sem} className="flex-1 flex flex-col items-center group/bar cursor-pointer">
+                          <div className="flex-1 relative w-full flex items-end justify-center">
+                            <div className="w-full rounded-t overflow-hidden transition-all duration-500 group-hover/bar:brightness-125"
+                              style={{ height: `${h}%`, minHeight: 2, background: "linear-gradient(to top, rgb(180,83,9), rgb(251,191,36))", animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }}>
+                              <Particles count={2} />
+                            </div>
+                          </div>
+                          <span className="text-[9px] text-neutral-500 mt-1">{d.sem}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Taxa fechamento line overlay */}
+                  <svg className="absolute inset-0 w-full h-[13rem] pointer-events-none" viewBox="0 0 480 200" preserveAspectRatio="none">
+                    <polyline points={closerWeekly.map((d, i) => `${i * (480 / 11) + 20},${200 - (d.txFech / 50) * 180}`).join(" ")} fill="none" stroke="rgb(52,211,153)" strokeWidth="2.5" />
+                    {closerWeekly.map((d, i) => (
+                      <circle key={d.sem} cx={i * (480 / 11) + 20} cy={200 - (d.txFech / 50) * 180} r="3" fill="rgb(52,211,153)" />
+                    ))}
+                  </svg>
+                </div>
+              );
+            })()}
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-400" /> MRR (R$)</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-emerald-400" /> Taxa Fech. (%)</span>
+              <span className="ml-auto font-bold text-amber-400">Total MRR: R$ {(closerWeekly.reduce((a,b)=>a+b.mrr,0)/1000).toFixed(0)}k</span>
+            </div>
+          </div>
+
+          {/* Ciclo Médio de Venda */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.55s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              {icons.clock}
+              <h3 className="font-bold text-sm text-slate-300">Ciclo Médio de Venda (dias)</h3>
+              <InfoTip title="Ciclo Médio" />
+            </div>
+            <div className="flex-1 relative min-h-[14rem]">
+              <div className="absolute left-0 top-0 text-[10px] text-neutral-500">30d</div>
+              <div className="absolute left-0 bottom-[20px] text-[10px] text-neutral-500">0d</div>
+              {/* Meta line */}
+              <div className="absolute left-6 right-0 border-t-2 border-dashed border-emerald-400/40 pointer-events-none" style={{ bottom: `${(14 / 30) * 85 + 10}%` }}>
+                <span className="absolute -top-3 right-0 text-[9px] text-emerald-400/60">Meta: 14d</span>
+              </div>
+              <svg className="w-full h-full" viewBox="0 0 480 200" preserveAspectRatio="none">
+                <polygon points={closerWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.ciclo / 30) * 180}`).join(" ") + ` 480,200 0,200`} fill="rgba(251,191,36,0.08)" />
+                <polyline points={closerWeekly.map((d, i) => `${i * (480 / 11)},${200 - (d.ciclo / 30) * 180}`).join(" ")} fill="none" stroke="rgb(251,191,36)" strokeWidth="2.5" />
+                {closerWeekly.map((d, i) => (
+                  <circle key={d.sem} cx={i * (480 / 11)} cy={200 - (d.ciclo / 30) * 180} r="4" fill={d.ciclo <= 14 ? "rgb(52,211,153)" : d.ciclo <= 18 ? "rgb(251,191,36)" : "rgb(251,113,133)"} stroke="rgba(0,0,0,0.5)" strokeWidth="1" />
+                ))}
+              </svg>
+              <div className="flex justify-between mt-1">
+                {closerWeekly.map(d => <span key={d.sem} className="text-[10px] text-neutral-500">{d.sem}</span>)}
+              </div>
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-emerald-500" /> ≤14d</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-500" /> 15-18d</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-rose-500" /> &gt;18d</span>
+              <span className="ml-auto">Atual: <span className="text-emerald-400 font-bold">{closerWeekly[closerWeekly.length-1].ciclo}d</span></span>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ NOVOS — Follow-up + Ticket/Indicação ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Tempo Follow-up pós-Demo */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.5s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              {icons.clock}
+              <h3 className="font-bold text-sm text-slate-300">Tempo Follow-up pós-Demo (horas)</h3>
+              <InfoTip title="Follow-up pós-Demo" />
+            </div>
+            <div className="flex-1 flex gap-1.5 items-end min-h-[14rem] relative">
+              {/* Meta line */}
+              <div className="absolute left-0 right-0 border-t-2 border-dashed border-emerald-400/40 pointer-events-none z-[1]" style={{ bottom: `${(2 / 5) * 100}%` }}>
+                <span className="absolute -top-4 right-0 text-[11px] font-bold text-emerald-400/70 bg-black/60 px-1 rounded">Meta: 2h</span>
+              </div>
+              {closerWeekly.map((d, i) => {
+                const h = (d.followUp / 5) * 100;
+                const color = d.followUp <= 2 ? "from-emerald-600 to-emerald-400" : d.followUp <= 3 ? "from-amber-600 to-amber-400" : "from-rose-600 to-rose-400";
+                return (
+                  <div key={d.sem} className="flex-1 flex flex-col items-center group/bar cursor-pointer">
+                    <span className="text-[10px] font-bold text-white mb-1 opacity-0 group-hover/bar:opacity-100 transition-opacity">{d.followUp}h</span>
+                    <div className="flex-1 relative w-full flex items-end">
+                      <div className={`w-full rounded-t overflow-hidden transition-all duration-500 group-hover/bar:brightness-125 bg-gradient-to-t ${color}`}
+                        style={{ height: `${h}%`, minHeight: 2, animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }}>
+                        <Particles count={2} />
+                      </div>
+                    </div>
+                    <span className="text-[9px] text-neutral-500 mt-1">{d.sem}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-emerald-500" /> ≤2h</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-amber-500" /> 2-3h</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-sm bg-rose-500" /> &gt;3h</span>
+              <span className="ml-auto">Atual: <span className="text-emerald-400 font-bold">{closerWeekly[closerWeekly.length-1].followUp}h</span></span>
+            </div>
+          </div>
+
+          {/* Ticket Médio + Taxa Indicação */}
+          <div className="rounded-2xl p-6 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.55s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              {icons.receipt}
+              <h3 className="font-bold text-sm text-slate-300">Ticket Médio + Taxa Indicação</h3>
+              <InfoTip title="Ticket e Indicação" />
+            </div>
+            {(() => {
+              const maxTk = Math.max(...closerWeekly.map(d => d.ticket));
+              return (
+                <div className="flex-1 relative min-h-[14rem]">
+                  <div className="absolute left-0 top-0 text-[10px] text-neutral-500">R${(maxTk/1000).toFixed(1)}k</div>
+                  <div className="absolute right-0 top-0 text-[10px] text-neutral-500">40%</div>
+                  <div className="flex gap-1 items-end h-[13rem]">
+                    {closerWeekly.map((d, i) => {
+                      const h = (d.ticket / maxTk) * 100;
+                      return (
+                        <div key={d.sem} className="flex-1 flex flex-col items-center group/bar cursor-pointer">
+                          <div className="flex-1 relative w-full flex items-end justify-center">
+                            <div className="w-full rounded-t overflow-hidden transition-all duration-500 group-hover/bar:brightness-125"
+                              style={{ height: `${h}%`, minHeight: 2, background: "linear-gradient(to top, rgb(8,145,178), rgb(34,211,238))", animation: `barEnter 0.8s ease-out ${i * 0.06}s forwards`, transformOrigin: "bottom" }}>
+                              <Particles count={2} />
+                            </div>
+                          </div>
+                          <span className="text-[9px] text-neutral-500 mt-1">{d.sem}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Indicação line overlay */}
+                  <svg className="absolute inset-0 w-full h-[13rem] pointer-events-none" viewBox="0 0 480 200" preserveAspectRatio="none">
+                    <polyline points={closerWeekly.map((d, i) => `${i * (480 / 11) + 20},${200 - (d.indicacao / 40) * 180}`).join(" ")} fill="none" stroke="rgb(251,191,36)" strokeWidth="2.5" />
+                    {closerWeekly.map((d, i) => (
+                      <circle key={d.sem} cx={i * (480 / 11) + 20} cy={200 - (d.indicacao / 40) * 180} r="3" fill="rgb(251,191,36)" />
+                    ))}
+                  </svg>
+                </div>
+              );
+            })()}
+            <div className="flex items-center gap-4 mt-3 text-[11px] text-neutral-400">
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-cyan-400" /> Ticket Médio (R$)</span>
+              <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-amber-400" /> Taxa Indicação (%)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ NOVO — Heatmap de Objeções ═══ */}
+        <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.6s both" }}>
+          <div className="flex items-center gap-2 mb-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+            <h3 className="font-bold text-sm text-slate-300">Heatmap de Objeções (Semana × Tipo)</h3>
+            <InfoTip title="Heatmap Objeções" />
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr>
+                  <th className="text-left text-neutral-500 font-bold uppercase tracking-wider pb-2 pr-4">Objeção</th>
+                  {heatmapData.map(d => <th key={d.sem} className="text-center text-neutral-500 font-bold pb-2 px-1">{d.sem}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {heatmapLabels.map(key => (
+                  <tr key={key}>
+                    <td className="text-slate-400 font-medium pr-4 py-1">{heatmapNames[key]}</td>
+                    {heatmapData.map(d => {
+                      const v = d[key];
+                      const maxH = 5;
+                      const intensity = v / maxH;
+                      const bg = v === 0 ? "rgba(255,255,255,0.02)" : `rgba(251,191,36,${0.1 + intensity * 0.6})`;
+                      return (
+                        <td key={d.sem} className="text-center py-1 px-1">
+                          <div className="rounded-md px-2 py-1.5 text-[11px] font-bold transition-all cursor-default" style={{ background: bg, color: v >= 3 ? "#fff" : v >= 1 ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)" }}>
+                            {v}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex items-center gap-3 mt-3 text-[10px] text-neutral-500">
+            <span>Intensidade:</span>
+            {[0, 1, 2, 3, 4, 5].map(v => (
+              <div key={v} className="w-6 h-4 rounded-sm" style={{ background: v === 0 ? "rgba(255,255,255,0.02)" : `rgba(251,191,36,${0.1 + (v/5) * 0.6})` }} />
+            ))}
+            <span>0 → 5+</span>
+          </div>
+        </div>
+
+        {/* ═══ NOVO — Indicadores Simples (3 barras) ═══ */}
+        <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.35s both" }}>
+          <div className="flex items-center gap-2 mb-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+            <h3 className="font-bold text-sm text-slate-300">Indicadores de Conversão</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { label: "Taxa Vendas vs MQL", value: "1.7%", pct: 1.7 },
+              { label: "Taxa Vendas vs SQL", value: "2.26%", pct: 2.26 },
+              { label: "Tempo Médio Ciclo", value: "14.2d", pct: 79 },
+            ].map(ind => (
+              <div key={ind.label} className="flex flex-col gap-2">
+                <span className="text-xs font-bold text-slate-400">{ind.label}</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-3 bg-white/[0.04] rounded-full overflow-hidden ring-1 ring-white/5 relative">
+                    <div className="h-full rounded-full relative overflow-hidden" style={{ width: `${Math.max(ind.pct, 3)}%`, background: "linear-gradient(90deg, rgb(217,119,6), rgb(251,191,36))", boxShadow: "0 0 12px rgba(251,191,36,0.3)", animation: "barEnter 0.8s ease-out forwards" }}>
+                      <Particles count={3} horizontal />
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold text-white min-w-[4rem] text-right">{ind.value}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══ NOVO — Tabela Semanal Detalhada ═══ */}
+        <div className="rounded-2xl p-6 border border-white/[0.04]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.6s both" }}>
+          <div className="flex items-center gap-2 mb-5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+            <h3 className="font-bold text-sm text-slate-300">Tabela Semanal Detalhada</h3>
+            <InfoTip title="Tabela Semanal" />
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[11px]">
+              <thead>
+                <tr className="border-b border-white/10">
+                  {["Sem", "Leads", "Qualif.", "Demos", "ShowUp", "Tx.Resp", "Tx.BANT", "SPIN", "Fech.", "Tx.Fech", "MRR", "Ciclo", "Ticket"].map(h => (
+                    <th key={h} className="text-left text-neutral-500 font-bold uppercase tracking-wider px-2 py-2">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sdrWeekly.map((s, i) => {
+                  const c = closerWeekly[i];
+                  const sp = spinWeekly[i];
+                  const spinColor = sp.score >= 8 ? "text-emerald-400" : sp.score >= 6 ? "text-amber-400" : "text-rose-400";
+                  const spinBg = sp.score >= 8 ? "bg-emerald-500/10 border-emerald-500/20" : sp.score >= 6 ? "bg-amber-500/10 border-amber-500/20" : "bg-rose-500/10 border-rose-500/20";
+                  return (
+                    <tr key={s.sem} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                      <td className="px-2 py-2 font-bold text-amber-400">{s.sem}</td>
+                      <td className="px-2 py-2 text-white">{s.leads}</td>
+                      <td className="px-2 py-2 text-white">{s.qualif}</td>
+                      <td className="px-2 py-2 text-white">{s.demos}</td>
+                      <td className="px-2 py-2 text-white">{s.showUps}</td>
+                      <td className="px-2 py-2"><span className={s.txResp >= 40 ? "text-emerald-400" : "text-amber-400"}>{s.txResp.toFixed(1)}%</span></td>
+                      <td className="px-2 py-2"><span className={s.txBANT >= 60 ? "text-emerald-400" : "text-amber-400"}>{s.txBANT.toFixed(1)}%</span></td>
+                      <td className="px-2 py-2">
+                        <span className={`inline-flex px-1.5 py-0.5 rounded border text-[10px] font-bold ${spinBg} ${spinColor}`}>
+                          {sp.score.toFixed(1)}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 text-white">{c.fech}</td>
+                      <td className="px-2 py-2"><span className={c.txFech >= 30 ? "text-emerald-400" : "text-amber-400"}>{c.txFech.toFixed(1)}%</span></td>
+                      <td className="px-2 py-2 text-white">R$ {(c.mrr/1000).toFixed(1)}k</td>
+                      <td className="px-2 py-2"><span className={c.ciclo <= 14 ? "text-emerald-400" : c.ciclo <= 18 ? "text-amber-400" : "text-rose-400"}>{c.ciclo}d</span></td>
+                      <td className="px-2 py-2 text-white">R$ {(c.ticket/1000).toFixed(1)}k</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
 
