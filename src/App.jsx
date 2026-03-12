@@ -550,6 +550,7 @@ export default function App() {
   const [spinTab, setSpinTab] = useState("score"); // score | dist
   const [hoveredSpin, setHoveredSpin] = useState(null);
   const [hoveredAtv, setHoveredAtv] = useState(null);
+  const [insightsOpen, setInsightsOpen] = useState(true);
 
   const maxVendas = Math.max(...evolution12m.map(e => e.vendas));
   const maxVolume = volumeMode === "vendas" ? Math.max(...volumeDiario.map(d => d.vendas)) : Math.max(...volumeDiario.map(d => d.fat));
@@ -586,8 +587,8 @@ export default function App() {
 
         {/* ═══ INSIGHTS IA — Alertas no Topo com Luzes Piscando ═══ */}
         <div className="relative overflow-hidden rounded-2xl border border-white/[0.06]" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.08s both" }}>
-          {/* Barra de luzes piscando */}
-          <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.04]">
+          {/* Barra de luzes piscando — clicável para recolher/expandir */}
+          <div className="flex items-center gap-3 px-5 py-3 cursor-pointer select-none hover:bg-white/[0.02] transition-colors" onClick={() => setInsightsOpen(v => !v)} style={{ borderBottom: insightsOpen ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
             <div className="flex items-center gap-2">
               <div className="size-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8),0_0_20px_rgba(251,191,36,0.4)]" style={{ animation: "insightPulse 2s ease-in-out infinite" }} />
               <div className="size-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8),0_0_20px_rgba(52,211,153,0.4)]" style={{ animation: "insightPulse 2s ease-in-out 0.4s infinite" }} />
@@ -595,14 +596,18 @@ export default function App() {
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"/><path d="M9 21h6"/></svg>
             <h3 className="text-sm font-bold text-white tracking-wide">Insights IA — Alertas Inteligentes</h3>
-            <div className="ml-auto flex items-center gap-1.5">
-              <div className="size-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 0.2s infinite" }} />
-              <div className="size-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_rgba(167,139,250,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 0.6s infinite" }} />
-              <div className="size-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 1.0s infinite" }} />
+            <span className="text-[10px] text-neutral-500 font-bold">{insights.length} alertas</span>
+            <div className="ml-auto flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <div className="size-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 0.2s infinite" }} />
+                <div className="size-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_rgba(167,139,250,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 0.6s infinite" }} />
+                <div className="size-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.6)]" style={{ animation: "insightPulse 1.5s ease-in-out 1.0s infinite" }} />
+              </div>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-neutral-400 transition-transform duration-300 ${insightsOpen ? "rotate-180" : ""}`}><path d="m6 9 6 6 6-6"/></svg>
             </div>
           </div>
           {/* Grid de balões de mensagem */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
+          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 transition-all duration-400 ease-in-out ${insightsOpen ? "p-4 max-h-[600px] opacity-100" : "max-h-0 opacity-0 overflow-hidden p-0"}`}>
             {insights.map((ins, i) => {
               const colors = ins.tipo === "positivo"
                 ? { dot: "bg-emerald-500", glow: "shadow-[0_0_10px_rgba(16,185,129,0.6)]", border: "border-emerald-500/25", bg: "bg-emerald-500/[0.06]", label: "text-emerald-400", arrow: "border-t-emerald-500/[0.06]" }
@@ -750,46 +755,6 @@ export default function App() {
 
         {/* ═══ Funil de Vendas + Meta vs Realizado ═══ */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Meta vs Realizado */}
-          <div className="rounded-2xl p-4 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.4s both" }}>
-            <div className="flex items-center gap-2 mb-4">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
-              <h3 className="font-bold text-xs text-slate-300">Meta vs Realizado</h3>
-              <InfoTip title="Meta vs Realizado" />
-            </div>
-            <div className="flex-1 flex flex-col gap-3">
-              {metaCards.map(m => {
-                const pct = Math.min((m.realizado / m.meta) * 100, 100);
-                const diasPassados = new Date().getDate();
-                const diasNoMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-                const projecao = (m.realizado / diasPassados) * diasNoMes;
-                const pctColor = pct >= 80 ? "from-emerald-600 to-emerald-400" : pct >= 60 ? "from-amber-600 to-amber-400" : "from-rose-600 to-rose-400";
-                const projColor = projecao >= m.meta ? "text-emerald-400" : "text-amber-400";
-                return (
-                  <div key={m.label} className="bg-black/30 border border-white/5 rounded-xl p-3 flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{m.label}</span>
-                      <span className="text-[10px] font-bold text-white">{pct.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex items-end gap-2 mb-2">
-                      <span className="text-lg font-bold text-white leading-tight">{m.format(m.realizado)}</span>
-                      <span className="text-[10px] text-neutral-500 mb-0.5">/ {m.format(m.meta)}</span>
-                    </div>
-                    <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden ring-1 ring-white/5 mb-1.5 relative">
-                      <div className={`h-full bg-gradient-to-r ${pctColor} rounded-full relative overflow-hidden`} style={{ width: `${pct}%`, boxShadow: "0 0 12px rgba(251,191,36,0.2)", animation: "barEnter 0.8s ease-out forwards" }}>
-                        <Particles count={2} horizontal />
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] text-neutral-500">Restam {diasNoMes - diasPassados}d</span>
-                      <span className={`text-[10px] font-bold ${projColor}`}>Proj: {m.format(Math.round(projecao))}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Funil de Vendas Overview */}
           <div className="lg:col-span-2 rounded-2xl p-5 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.2s both" }}>
             <div className="flex items-center justify-between mb-4">
@@ -824,6 +789,46 @@ export default function App() {
                           <ArrowIcon up={stage.up} />{stage.delta}
                         </span>
                       </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Meta vs Realizado */}
+          <div className="rounded-2xl p-4 border border-white/[0.04] flex flex-col" style={{ ...glass, animation: "animationIn 0.8s ease-out 0.4s both" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-400/60"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+              <h3 className="font-bold text-xs text-slate-300">Meta vs Realizado</h3>
+              <InfoTip title="Meta vs Realizado" />
+            </div>
+            <div className="flex-1 flex flex-col gap-3">
+              {metaCards.map(m => {
+                const pct = Math.min((m.realizado / m.meta) * 100, 100);
+                const diasPassados = new Date().getDate();
+                const diasNoMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+                const projecao = (m.realizado / diasPassados) * diasNoMes;
+                const pctColor = pct >= 80 ? "from-emerald-600 to-emerald-400" : pct >= 60 ? "from-amber-600 to-amber-400" : "from-rose-600 to-rose-400";
+                const projColor = projecao >= m.meta ? "text-emerald-400" : "text-amber-400";
+                return (
+                  <div key={m.label} className="bg-black/30 border border-white/5 rounded-xl p-3 flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{m.label}</span>
+                      <span className="text-[10px] font-bold text-white">{pct.toFixed(1)}%</span>
+                    </div>
+                    <div className="flex items-end gap-2 mb-2">
+                      <span className="text-lg font-bold text-white leading-tight">{m.format(m.realizado)}</span>
+                      <span className="text-[10px] text-neutral-500 mb-0.5">/ {m.format(m.meta)}</span>
+                    </div>
+                    <div className="h-2 bg-white/[0.04] rounded-full overflow-hidden ring-1 ring-white/5 mb-1.5 relative">
+                      <div className={`h-full bg-gradient-to-r ${pctColor} rounded-full relative overflow-hidden`} style={{ width: `${pct}%`, boxShadow: "0 0 12px rgba(251,191,36,0.2)", animation: "barEnter 0.8s ease-out forwards" }}>
+                        <Particles count={2} horizontal />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] text-neutral-500">Restam {diasNoMes - diasPassados}d</span>
+                      <span className={`text-[10px] font-bold ${projColor}`}>Proj: {m.format(Math.round(projecao))}</span>
                     </div>
                   </div>
                 );
